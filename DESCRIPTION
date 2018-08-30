@@ -1,0 +1,20 @@
+Package: plsr
+Type: Package
+Title: Partial Least Squares Analyses for Dummies
+Version: 0.1.0
+Authors@R: person(c("Jan","Niklas"), "Schneider", email = "jan_schneider@live.de",
+  role = c("aut", "cre"))
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports:
+    boot,
+    ggplot2,
+    reshape2,
+    shiny
+RoxygenNote: 6.1.0
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

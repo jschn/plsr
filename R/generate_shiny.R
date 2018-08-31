@@ -12,7 +12,7 @@ plot_default = function(x,time_steps=10,t){
   barplot(x[a:b],ylim = c(min(x),max(x)))
 }
 
-
+#TODO: somewhere bug: works only if plsr_obj in environment
 create_shiny = function(plsr_obj,time_steps, app_path=".", plot_func="plot_default",...){
   doc_start = sprintf('time_range <- c(1,%s)
 time_start_val <- time_range[2]/2

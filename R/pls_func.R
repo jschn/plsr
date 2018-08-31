@@ -169,8 +169,8 @@ predict.plsr=function(plsr_obj,new_data,direction="forward"){
 }
 
 
-#TODO:methods for plot, summary
 
+#TODO: options to discard results from permutation and bootstrap steps
 #TODO: need to provide examples for doc
 
 #' Run partial least square analysis

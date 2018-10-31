@@ -115,8 +115,9 @@ plot_latent_variables = function(plsr_obj,lv_num=1,sd=3,frame=1){
 }
 
 plot_perm_results=function(plsr_obj,sig_level = 0.05){
-  lv_names = paste("lv", 1:7)
 
+  #TODO: maybe always limit to 0 to 1. When all p values are low or high, you cannot see andy difference and also not the significance line
+  lv_names = paste("lv", 1:nrow(plsr_obj$decomposition$D))
   barplot(plsr_obj$permutation$p_values,names.arg = lv_names, main = "Permutation Testing Results")
   abline(h=sig_level, col="red")
 }
@@ -136,7 +137,7 @@ predict.plsr=function(plsr_obj,new_data,direction="forward"){
   }
 
   if ((class(new_data)!="matrix")){
-    #if new_data is neither matrix nor data.frame than assume it's a vector and turn it into a 1 by length(vector) matrix
+    #if new_data is neither matrix nor data.frame then assume it's a vector and turn it into a 1 by length(vector) matrix
     new_data = matrix(new_data, nrow=1)
   }
   U=plsr_obj$decomposition$U #matrix for projection of tracking data into latent space
@@ -204,6 +205,10 @@ pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F){
   #Projection of original values into singular vector space: scores
   LX = X%*%V
   LY = Y%*%U
+
+  #name rows and columns of V
+  rownames(V)=colnames(X)
+  colnames(V) = paste("LV",1:ncol(V),sep="")
 
   D_perm_vals = matrix(NA,nrow = n_perm, ncol = length(D)) #will store singular values obtained during permutation
 

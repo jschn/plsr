@@ -33,7 +33,7 @@ sidebarPanel(',time_steps)
 #slider generation
 slider_string = ""
 for (s in 1:ncol(plsr_obj$orig_data$X)){
-  new_slider=sprintf('sliderInput(inputId = %s, label = %s, min = -300, max = 300, value = 0),', paste0("'s",s,"'"), paste0("'Slider ", s,"'") )
+  new_slider=sprintf('sliderInput(inputId = %s, label = %s, min = -300, max = 300, value = 0),', paste0("'s",s,"'"), paste0("'", rownames(plsr_obj$decomposition$V)[s],"'") )
   slider_string = paste0(slider_string,new_slider)
 }
 

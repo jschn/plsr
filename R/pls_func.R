@@ -47,7 +47,6 @@ plot.plsr = function(plsr_obj){
   invisible(readline(prompt="Press [enter] for next plot"))
   plot_boot_results(plsr_obj)
   invisible(readline(prompt="Press [enter] for next plot"))
-
 }
 
 plot_boot_results = function(plsr_obj, sig_threshold=1.96){
@@ -104,13 +103,20 @@ plot_latent_variables = function(plsr_obj,lv_num=1,sd=3,frame=1){
   steps = c(-sd,0,sd)
   num_steps = length(steps)
   old_setting = par()$mfrow
-  par(mfrow=c(1,num_steps))
+  par(mfrow=c(2,num_steps))
 
   for (i in 1:num_steps){
     plot_title = paste(steps[i],"SDs")
     plot_frame(rowSums(cbind((U%*%sqrt(D)*steps[i])[,lv_num]))*scaling$Y_scale+scaling$Y_mean,lim=F,title=plot_title,single_frame = frame)
+    #plot_frame(rowSums(cbind((U*steps[i])[,lv_num]))*scaling$Y_scale+scaling$Y_mean,lim=F,title=plot_title,single_frame = frame)
   }
+  for (i in 1:num_steps){
+    #barplot(rowSums(cbind((V%*%sqrt(D)*steps[i])[,lv_num]))*scaling$X_scale+scaling$X_mean,cex.axis = 1.5,font=2)
+    barplot(rowSums(cbind((V*steps[i])[,lv_num]))*scaling$X_scale+scaling$X_mean,cex.axis = 1.5,font=2)
+  }
+
   par(mfrow=old_setting)
+
 
 }
 
@@ -131,6 +137,8 @@ print.plsr=function(plsr_obj){
   cat("\n")
 }
 
+#TODO: stimmt noch nicht ganz
+#forward(backward(x)) = x sollte gelten. Tut es aber nicht
 predict.plsr=function(plsr_obj,new_data,direction="forward"){
   if (class(new_data)=="data.frame"){
     new_data=as.matrix(new_data)

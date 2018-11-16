@@ -1,3 +1,9 @@
+biplot.plsr = function(plsr_obj,direction = "forward",...){
+  V = plsr_obj$decomposition$V
+  LX = plsr_obj$decomposition$LX
+  biplot(LX,V,...)
+}
+
 bootstrap_saliences <- function(data,indices,X_ncol, V) {
   #TODO: find out if I can pass things by reference: would be good for X,Y,U and V
   data = data[indices,]
@@ -27,6 +33,38 @@ bootstrap_saliences <- function(data,indices,X_ncol, V) {
   #order of linearized matrices: D (just diagonal),U,V
   out = c(sqrt(colSums(V_boot_rot**2)),c(U_boot_rot),c(V_boot_rot))
   return(out)
+}
+
+#' Calculates explained variance per component of the original data sets X and Y
+#'
+#' @param plsr_obj A plsr object
+explained_variance=function(plsr_obj){
+  Y= plsr_obj$orig_data$Y
+  X = plsr_obj$orig_data$X
+  LX= plsr_obj$decomposition$LX
+  LY= plsr_obj$decomposition$LY
+  U= plsr_obj$decomposition$U
+  V= plsr_obj$decomposition$V
+  vars_y = matrix(NA, ncol=ncol(LY), nrow=1)
+  vars_x = matrix(NA, ncol=ncol(LX), nrow=1)
+  Var_X = apply(X,2,var)
+  Var_Y = apply(Y,2,var)
+  for (c in 1:ncol(LX)){
+    X_hat=LX[,1:c]%*%t(V[,1:c]) # original X calculated from component c
+    X_res= X-X_hat #residual of X-X_hat
+    Var_X_res = apply(X_res,2,var) # variance per column of residual
+
+    Y_hat=LY[,1:c]%*%t(U[,1:c])
+    Y_res = Y-Y_hat
+    Var_Y_res = apply(Y_res,2,var)
+
+    var_exp_x = (sum(Var_X) - sum(Var_X_res))/sum(Var_X)
+    var_exp_y = (sum(Var_Y) - sum(Var_Y_res))/sum(Var_Y)
+
+    vars_x[1,c] = var_exp_x
+    vars_y[1,c] = var_exp_y
+  }
+  return(list(ExpVarX=vars_x,ExpVarY=vars_y))
 }
 
 
@@ -86,6 +124,16 @@ plot_boot_results = function(plsr_obj, sig_threshold=1.96){
     ggplot2::ggtitle("Significant V Elements"))
 }
 
+plot_explained_variance=function(plsr_obj){
+  exp_list = explained_variance(plsr_obj)
+  par(mfrow = c(1,2))
+  barplot(exp_list$ExpVarX, main = "Explained Variance of X per number of LVs",
+          names.arg = 1:length(exp_list$ExpVarX), xlab = "Number of LVs", ylab = "Explained Variance")
+  barplot(exp_list$ExpVarY, main = "Explained Variance of Y per number of LVs",
+          names.arg = 1:length(exp_list$ExpVarX), xlab = "Number of LVs", ylab = "Explained Variance")
+
+  par(mfrow = c(1,1))
+}
 
 #' Plots latent variables
 #'
@@ -154,7 +202,7 @@ predict.plsr=function(plsr_obj,new_data,direction="forward"){
   scaling = plsr_obj$scaling
 
 
-  if (direction=="forward"){
+  if (direction=="forward"){#X to Y
     x_centered = sweep(new_data,2,scaling$X_mean,"-")
     x_scaled = sweep(x_centered,2,scaling$X_scale,"/")
     x_v_space = x_scaled%*%V #vector in latent space
@@ -210,13 +258,13 @@ pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F){
   V = svd_sol$v
   D = svd_sol$d
 
-  #Projection of original values into singular vector space: scores
-  LX = X%*%V
-  LY = Y%*%U
-
   #name rows and columns of V
   rownames(V)=colnames(X)
   colnames(V) = paste("LV",1:ncol(V),sep="")
+
+  #Projection of original values into singular vector space: scores
+  LX = X%*%V
+  LY = Y%*%U
 
   D_perm_vals = matrix(NA,nrow = n_perm, ncol = length(D)) #will store singular values obtained during permutation
 

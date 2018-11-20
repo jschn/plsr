@@ -1,7 +1,9 @@
 biplot.plsr = function(plsr_obj,direction = "forward",...){
+  #TODO: do this for backwards too
+
   V = plsr_obj$decomposition$V
   LX = plsr_obj$decomposition$LX
-  biplot(LX,V,...)
+  biplot(LX,V,xlab = colnames(V)[1],ylab = colnames(V)[2],...)
 }
 
 bootstrap_saliences <- function(data,indices,X_ncol, V) {

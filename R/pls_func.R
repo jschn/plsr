@@ -1,9 +1,11 @@
-biplot.plsr = function(plsr_obj,direction = "forward",...){
+biplot.plsr = function(plsr_obj,direction = "forward",LVs=c(1,2),...){
   #TODO: do this for backwards too
+  if (direction=="forward"){
+    V = plsr_obj$decomposition$V
+    LX = plsr_obj$decomposition$LX
+    biplot(LX[,LVs],V[,LVs],xlab = colnames(V[,LVs])[1],ylab = colnames(V[,LVs])[2],...)
+  }
 
-  V = plsr_obj$decomposition$V
-  LX = plsr_obj$decomposition$LX
-  biplot(LX,V,xlab = colnames(V)[1],ylab = colnames(V)[2],...)
 }
 
 bootstrap_saliences <- function(data,indices,X_ncol, V) {
@@ -170,12 +172,12 @@ plot_latent_variables = function(plsr_obj,lv_num=1,sd=3,frame=1){
 
 }
 
-plot_perm_results=function(plsr_obj,sig_level = 0.05){
+plot_perm_results=function(plsr_obj,sig_level = 0.05,main = "Permutation Testing Results",lwd=2,col="red",...){
 
   #TODO: maybe always limit to 0 to 1. When all p values are low or high, you cannot see andy difference and also not the significance line
-  lv_names = paste("lv", 1:nrow(plsr_obj$decomposition$D))
-  barplot(plsr_obj$permutation$p_values,names.arg = lv_names, main = "Permutation Testing Results")
-  abline(h=sig_level, col="red")
+  lv_names = paste("LV", 1:nrow(plsr_obj$decomposition$D))
+  barplot(plsr_obj$permutation$p_values,names.arg = lv_names,main=main,ylab="P-Value",...)
+  abline(h=sig_level,lwd=lwd, col=col)
 }
 
 print.plsr=function(plsr_obj){

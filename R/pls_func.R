@@ -1,3 +1,5 @@
+#TODO: include Chris' JSON converter
+
 biplot.plsr = function(plsr_obj,direction = "forward",LVs=c(1,2),...){
   #TODO: do this for backwards too
   if (direction=="forward"){
@@ -38,6 +40,15 @@ bootstrap_saliences <- function(data,indices,X_ncol, V) {
   out = c(sqrt(colSums(V_boot_rot**2)),c(U_boot_rot),c(V_boot_rot))
   return(out)
 }
+
+#' Calculates the precision of the a p-value estimated by permutation testing
+#'
+#' @param p The p value
+#' @param k Number of permutation iterations
+permutation_precision = function(p,k){
+  return(sqrt((p*(1-p)/k)))
+}
+
 
 #' Calculates explained variance per component of the original data sets X and Y
 #'
@@ -172,12 +183,12 @@ plot_latent_variables = function(plsr_obj,lv_num=1,sd=3,frame=1){
 
 }
 
-plot_perm_results=function(plsr_obj,sig_level = 0.05,main = "Permutation Testing Results",lwd=2,col="red",...){
+plot_perm_results=function(plsr_obj,...,alpha = NULL,main = "Permutation Testing Results",lwd=2,col="red"){
 
-  #TODO: maybe always limit to 0 to 1. When all p values are low or high, you cannot see andy difference and also not the significance line
+  #TODO: maybe always limit to 0 to 1. When all p values are low or high, you cannot see any difference and also not the significance line
   lv_names = paste("LV", 1:nrow(plsr_obj$decomposition$D))
   barplot(plsr_obj$permutation$p_values,names.arg = lv_names,main=main,ylab="P-Value",...)
-  abline(h=sig_level,lwd=lwd, col=col)
+  if (is.null(alpha)) abline(h=plsr_obj$permutation$alpha,lwd=lwd, col=col) else abline(h=alpha,lwd=lwd, col=col)
 }
 
 print.plsr=function(plsr_obj){
@@ -243,7 +254,7 @@ predict.plsr=function(plsr_obj,new_data,direction="forward"){
 #' @param scale Scaling of X and Y (Boolean)
 #' @param verbose Provides additional output
 #' @return A PLS Object
-pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F){
+pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F, alpha=0.05){
   #TODO: should this also work if X or Y only have one dimensions? IF so, need to make it work
 
 
@@ -306,8 +317,6 @@ pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F){
 
   close(permutation_progress)
   cat("Done!\n")
-  #TODO: answer this
-  #now do I compare only the first LV to the first column of D_perm and the second LV to the second column..or what?
 
   #calculate p values here: percentage of singular value distribution that is bigger than our obtained svs
   p_vals = c()
@@ -348,8 +357,9 @@ pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F){
   U_SE = matrix(u_se,nrow=nrow(U))
 
   #organize output
+  precision = permutation_precision(p_vals,n_perm)
   decomp = list(U=U,V=V,D=diag(D),LX=LX,LY=LY)
-  perm = list(D_perm= D_perm_vals, p_values=p_vals)
+  perm = list(D_perm= D_perm_vals, p_values=p_vals, alpha=alpha, precision=precision)
   bootstrp = list(sv_se=sv_se, D_boot= D_boot_vals, U_boot= U_boot_vals,V_boot= V_boot_vals, U_SE = U_SE,V_SE=V_SE)
 
   X_mean = attr(X,"scaled:center")
@@ -360,6 +370,9 @@ pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F){
   sclng = list(X_mean=X_mean,X_scale=X_scale,Y_mean=Y_mean,Y_scale=Y_scale)
   org_dat = list(X=X,Y=Y)
   output = new_plsr(decomp, perm, bootstrp, sclng,org_dat, match.call())
+
+  if (sum(p_vals<alpha)!=sum((p_vals+precision)<alpha)) warning("Some p-values are not stable under this precision.\n Try to increase the number of permutation steps (n_perm).")
+  if (sum(p_vals<alpha)!=sum((p_vals-precision)<alpha)) warning("Some p-values are not stable under this precision.\n Try to increase the number of permutation steps (n_perm).")
 
   return(output)
 }

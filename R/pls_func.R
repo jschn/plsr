@@ -230,7 +230,7 @@ predict.plsr=function(plsr_obj,new_data,direction="forward"){
   else{
     y_centered = sweep(new_data,2,scaling$Y_mean,"-")
     y_scaled = sweep(y_centered,2,scaling$Y_scale,"/")
-    y_u_space = y_scaled%*%U #vector in latent space
+    y_u_space = y_scaled%*%U #vector in latent space, TODO: this should be transposed (maybe?)
 
     pred = y_u_space%*%sqrt(D)%*%t(V)
     pred_scaled_back = pred*scaling$X_scale+scaling$X_mean

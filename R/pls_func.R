@@ -41,7 +41,7 @@ bootstrap_saliences <- function(data,indices,X_ncol, V) {
   return(out)
 }
 
-#' Calculates the precision of the a p-value estimated by permutation testing
+#' Calculates the precision of the p-value estimated by permutation testing
 #'
 #' @param p The p value
 #' @param k Number of permutation iterations
@@ -95,6 +95,8 @@ loadings.plsr=function(plsr_obj){
 
 plot.plsr = function(plsr_obj){
   plot_perm_results(plsr_obj)
+  invisible(readline(prompt="Press [enter] for next plot"))
+  plot_perm_distr(plsr_obj)
   invisible(readline(prompt="Press [enter] for next plot"))
   plot_latent_variables(plsr_obj)
   invisible(readline(prompt="Press [enter] for next plot"))
@@ -184,11 +186,30 @@ plot_latent_variables = function(plsr_obj,lv_num=1,sd=3,frame=1){
 }
 
 plot_perm_results=function(plsr_obj,...,alpha = NULL,main = "Permutation Testing Results",lwd=2,col="red"){
-
   #TODO: maybe always limit to 0 to 1. When all p values are low or high, you cannot see any difference and also not the significance line
   lv_names = paste("LV", 1:nrow(plsr_obj$decomposition$D))
   barplot(plsr_obj$permutation$p_values,names.arg = lv_names,main=main,ylab="P-Value",...)
   if (is.null(alpha)) abline(h=plsr_obj$permutation$alpha,lwd=lwd, col=col) else abline(h=alpha,lwd=lwd, col=col)
+}
+
+plot_perm_distr = function(plsr_obj,..., alpha= NULL,lwd=2,col="red"){
+  n_comp = ncol(plsr_obj$decomposition$D)
+  plot_dim=ceiling(sqrt(n_comp))
+  old_setting = par()$mfrow
+  par(mfrow=c(plot_dim,plot_dim))
+
+  for (i in 1:n_comp){
+    #ensure that real singular value can always be drawn in the plot by setting the xlim parameter accordingly
+    xlim_range = range(plsr_obj$permutation$D_perm[,i])
+    if (xlim_range[2]<plsr_obj$decomposition$D[i,i]){
+      xlim_range[2]= plsr_obj$decomposition$D[i,i]+1
+    }
+    hist_title = paste("Null Distribution of Singular Value", i)
+    xlab_name = paste("Values of Singular Value", i)
+    hist(plsr_obj$permutation$D_perm[,i],...,main = hist_title, xlim = xlim_range, xlab = xlab_name)
+    if (is.null(alpha)) abline(v=plsr_obj$decomposition$D[i,i],lwd=lwd, col=col) else abline(v=plsr_obj$decomposition$D[i,i],lwd=lwd, col=col)
+  }
+  par(mfrow=old_setting)
 }
 
 print.plsr=function(plsr_obj){

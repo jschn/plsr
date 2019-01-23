@@ -2,7 +2,7 @@
 % Please edit documentation in R/pls_func.R
 \name{pls}
 \alias{pls}
-\title{Run partial least square analysis}
+\title{Run partial least squares analysis}
 \usage{
 pls(X, Y, n_perm = 10, n_boot = 10, scale = T, verbose = F,
   alpha = 0.05)
@@ -19,10 +19,12 @@ pls(X, Y, n_perm = 10, n_boot = 10, scale = T, verbose = F,
 \item{scale}{Scaling of X and Y (Boolean)}
 
 \item{verbose}{Provides additional output}
+
+\item{alpha}{The significance level}
 }
 \value{
 A PLS Object
 }
 \description{
-Run partial least square analysis
+Run partial least squares analysis
 }

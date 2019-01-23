@@ -1,10 +1,12 @@
 #TODO: include Chris' JSON converter
+#'@importFrom stats biplot sd var
+#'@importFrom graphics abline barplot hist par plot segments
 
-biplot.plsr = function(plsr_obj,direction = "forward",LVs=c(1,2),...){
+biplot.plsr = function(x,direction = "forward",LVs=c(1,2),...){
   #TODO: do this for backwards too
   if (direction=="forward"){
-    V = plsr_obj$decomposition$V
-    LX = plsr_obj$decomposition$LX
+    V = x$decomposition$V
+    LX = x$decomposition$LX
     biplot(LX[,LVs],V[,LVs],xlab = colnames(V[,LVs])[1],ylab = colnames(V[,LVs])[2],...)
   }
 
@@ -93,14 +95,15 @@ loadings.plsr=function(plsr_obj){
   print("this should display loadings")
 }
 
-plot.plsr = function(plsr_obj){
-  plot_perm_results(plsr_obj)
+plot.plsr = function(x,...){
+  #TODO: think about dots that I needed to add for generic
+  plot_perm_results(x)
   invisible(readline(prompt="Press [enter] for next plot"))
-  plot_perm_distr(plsr_obj)
+  plot_perm_distr(x)
   invisible(readline(prompt="Press [enter] for next plot"))
-  plot_latent_variables(plsr_obj)
+  plot_latent_variables(x)
   invisible(readline(prompt="Press [enter] for next plot"))
-  plot_boot_results(plsr_obj)
+  plot_boot_results(x)
   invisible(readline(prompt="Press [enter] for next plot"))
 }
 
@@ -128,16 +131,16 @@ plot_boot_results = function(plsr_obj, sig_threshold=1.96){
   molten_V_in_SE_sig = molten_V_in_SE
   molten_V_in_SE_sig$value = molten_V_in_SE_sig$value > sig_threshold
 
-  print(ggplot2::ggplot(data=molten_U_in_SE,ggplot2::aes(x=Var1,y=Var2,fill=value))+ggplot2::geom_tile(color="black")+ggplot2::scale_fill_continuous()+
+  print(ggplot2::ggplot(data=molten_U_in_SE,ggplot2::aes_string(x="Var1",y="Var2",fill="value"))+ggplot2::geom_tile(color="black")+ggplot2::scale_fill_continuous()+
     ggplot2::ggtitle("Standardized U"))
   invisible(readline(prompt="Press [enter] for next plot"))
-  print(ggplot2::ggplot(data=molten_V_in_SE,ggplot2::aes(x=Var1,y=Var2,fill=value))+ggplot2::geom_tile(color="black")+ggplot2::scale_fill_continuous()+
+  print(ggplot2::ggplot(data=molten_V_in_SE,ggplot2::aes_string(x="Var1",y="Var2",fill="value"))+ggplot2::geom_tile(color="black")+ggplot2::scale_fill_continuous()+
     ggplot2::ggtitle("Standardized V"))
   invisible(readline(prompt="Press [enter] for next plot"))
-  print(ggplot2::ggplot(data=molten_U_in_SE_sig,ggplot2::aes(x=Var1,y=Var2,fill=value))+ggplot2::geom_tile(color="black")+ggplot2::scale_fill_discrete()+
+  print(ggplot2::ggplot(data=molten_U_in_SE_sig,ggplot2::aes_string(x="Var1",y="Var2",fill="value"))+ggplot2::geom_tile(color="black")+ggplot2::scale_fill_discrete()+
     ggplot2::ggtitle("Significant U Elements"))
   invisible(readline(prompt="Press [enter] for next plot"))
-  print(ggplot2::ggplot(data=molten_V_in_SE_sig,ggplot2::aes(x=Var1,y=Var2,fill=value))+ggplot2::geom_tile(color="black")+ggplot2::scale_fill_discrete()+
+  print(ggplot2::ggplot(data=molten_V_in_SE_sig,ggplot2::aes_string(x="Var1",y="Var2",fill="value"))+ggplot2::geom_tile(color="black")+ggplot2::scale_fill_discrete()+
     ggplot2::ggtitle("Significant V Elements"))
 }
 
@@ -212,18 +215,18 @@ plot_perm_distr = function(plsr_obj,..., alpha= NULL,lwd=2,col="red"){
   par(mfrow=old_setting)
 }
 
-print.plsr=function(plsr_obj){
+print.plsr=function(x,...){
   cat("\n")
   cat("plsr object\n") #TODO: dimensions of orig data
   cat("\n")
   cat("Call:\n")
-  print(plsr_obj$call)
+  print(x$call)
   cat("\n")
 }
 
 #TODO: stimmt noch nicht ganz
 #forward(backward(x)) = x sollte gelten. Tut es aber nicht
-predict.plsr=function(plsr_obj,new_data,direction="forward"){
+predict.plsr=function(object,new_data,direction="forward",...){
   if (class(new_data)=="data.frame"){
     new_data=as.matrix(new_data)
   }
@@ -232,10 +235,10 @@ predict.plsr=function(plsr_obj,new_data,direction="forward"){
     #if new_data is neither matrix nor data.frame then assume it's a vector and turn it into a 1 by length(vector) matrix
     new_data = matrix(new_data, nrow=1)
   }
-  U=plsr_obj$decomposition$U #matrix for projection of tracking data into latent space
-  D=plsr_obj$decomposition$D #covariance of latent components on diagonal
-  V=plsr_obj$decomposition$V #matrix for projection of ratings into latent space
-  scaling = plsr_obj$scaling
+  U=object$decomposition$U #matrix for projection of tracking data into latent space
+  D=object$decomposition$D #covariance of latent components on diagonal
+  V=object$decomposition$V #matrix for projection of ratings into latent space
+  scaling = object$scaling
 
 
   if (direction=="forward"){#X to Y
@@ -274,7 +277,9 @@ predict.plsr=function(plsr_obj,new_data,direction="forward"){
 #' @param n_boot Number of bootstrap iterations
 #' @param scale Scaling of X and Y (Boolean)
 #' @param verbose Provides additional output
+#' @param alpha The significance level
 #' @return A PLS Object
+#' @export
 pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F, alpha=0.05){
   #TODO: should this also work if X or Y only have one dimensions? IF so, need to make it work
 
@@ -305,12 +310,12 @@ pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F, alpha=0.05){
   D_perm_vals = matrix(NA,nrow = n_perm, ncol = length(D)) #will store singular values obtained during permutation
 
 
-  permutation_progress <- txtProgressBar(min = 0, max = n_perm, style = 2)
+  permutation_progress <- utils::txtProgressBar(min = 0, max = n_perm, style = 2)
   cat("Permuting...\n\n")
   #permutation loop
   for(p in 1:n_perm){
 
-    setTxtProgressBar(permutation_progress,p)
+    utils::setTxtProgressBar(permutation_progress,p)
 
     #let's permute X
     X_perm = X[sample(nrow(X)),]
@@ -398,25 +403,25 @@ pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F, alpha=0.05){
   return(output)
 }
 
-summary.plsr=function(plsr_obj){
+summary.plsr=function(object,...){
   cat("\n")
   cat("plsr object\n\n") #TODO: dimensions of orig data
-  cat("Permutation iterations:", plsr_obj$call$n_perm,"\n")#TODO: save this as actual value
+  cat("Permutation iterations:", object$call$n_perm,"\n")#TODO: save this as actual value
   cat("P_values:\n")
-  print(plsr_obj$permutation$p_values)
+  print(object$permutation$p_values)
   cat("\n")
-  cat("Bootstrap iterations:", plsr_obj$call$n_boot, "\n")
+  cat("Bootstrap iterations:", object$call$n_boot, "\n")
   cat("\n")
-  if(dim(plsr_obj$decomposition$U)[1]<11 && dim(plsr_obj$decomposition$U)[2]<11){
+  if(dim(object$decomposition$U)[1]<11 && dim(object$decomposition$U)[2]<11){
     cat("Loading matrix for Y-side (U)\n")
-    print(plsr_obj$decomposition$U)
+    print(object$decomposition$U)
   }
   else{
     cat("Loading matrix for Y-side (U) too big...ommited\n\n")
   }
-  if(dim(plsr_obj$decomposition$V)[1]<11 && dim(plsr_obj$decomposition$V)[2]<11){
+  if(dim(object$decomposition$V)[1]<11 && dim(object$decomposition$V)[2]<11){
     cat("Loading matrix for X-side (V)\n\n")
-    print(plsr_obj$decomposition$V)
+    print(object$decomposition$V)
   }
   else{
     cat("Loading matrix for X-side (V) too big...ommited\n")

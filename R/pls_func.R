@@ -245,7 +245,7 @@ predict.plsr=function(plsr_obj,new_data,direction="forward"){
 #TODO: options to discard results from permutation and bootstrap steps
 #TODO: need to provide examples for doc
 
-#' Run partial least square analysis
+#' Run partial least squares analysis
 #'
 #' @param X A matrix of m observations on n dimensions
 #' @param Y A matrix of m observations on n dimensions

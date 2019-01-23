@@ -4,12 +4,21 @@
 \alias{pls}
 \title{Run partial least square analysis}
 \usage{
-pls(X, Y, n_perm = 1000, n_boot = 1000, scale = T, verbose = F)
+pls(X, Y, n_perm = 10, n_boot = 10, scale = T, verbose = F,
+  alpha = 0.05)
 }
 \arguments{
 \item{X}{A matrix of m observations on n dimensions}
 
 \item{Y}{A matrix of m observations on n dimensions}
+
+\item{n_perm}{Number of permutation iterations}
+
+\item{n_boot}{Number of bootstrap iterations}
+
+\item{scale}{Scaling of X and Y (Boolean)}
+
+\item{verbose}{Provides additional output}
 }
 \value{
 A PLS Object

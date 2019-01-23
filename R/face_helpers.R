@@ -5,6 +5,9 @@ concat_into_vector=function(frame_matrix){
 
 plot_frame=function(frame_vec,title="",lim=T, single_frame=NULL){
 
+  connections<- NULL;rm(connections); utils::data(connections); #to get rid of R CMD check complaints about using connections
+
+
   if (is.numeric(single_frame)){
     a = (single_frame-1)*136+1
     b = single_frame*136

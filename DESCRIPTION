@@ -2,12 +2,13 @@ Package: plsr
 Type: Package
 Title: Pleasure - Partial Least Squares Analyses for R with Permutation Testing
 Version: 0.1.0
-Authors@R: person(c("Jan","Niklas"), "Schneider", email = "jan_schneider@live.de",
-  role = c("aut", "cre"))
+Authors@R: c(
+    person(c("Jan","Niklas"), "Schneider", email = "jan_schneider@live.de",role = c("aut", "cre")),
+    person(c("Timothy","Raymond"), "Brick", email = "tbrick@psu.edu",role = c("aut")))          
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 Depends: R (>= 2.10)
-License: No idea yet
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports:

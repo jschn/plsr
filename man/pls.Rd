@@ -23,7 +23,7 @@ pls(X, Y, n_perm = 10, n_boot = 10, scale = T, verbose = F,
 \item{alpha}{The significance level}
 }
 \value{
-A PLS Object
+A plsr Object
 }
 \description{
 Run partial least squares analysis

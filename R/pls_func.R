@@ -2,6 +2,7 @@
 #'@importFrom stats biplot sd var
 #'@importFrom graphics abline barplot hist par plot segments
 
+#' @export
 biplot.plsr = function(x,direction = "forward",LVs=c(1,2),...){
   #TODO: do this for backwards too
   if (direction=="forward"){
@@ -84,17 +85,20 @@ explained_variance=function(plsr_obj){
   return(list(ExpVarX=vars_x,ExpVarY=vars_y))
 }
 
-
+#' @export
 new_plsr=function(decomp=list(),perm=list(), bootstrp=list(), sclng=list(),org_dat=list(),cl=list()){
   #TODO: stopifnots here?
 
   structure(list(decomposition=decomp, permutation=perm, bootstrapping=bootstrp, scaling=sclng,orig_data=org_dat,call=cl),class="plsr")
 }
 
+#TODO
+#' @export
 loadings.plsr=function(plsr_obj){
   print("this should display loadings")
 }
 
+#' @export
 plot.plsr = function(x,...){
   #TODO: think about dots that I needed to add for generic
   plot_perm_results(x)
@@ -191,7 +195,7 @@ plot_latent_variables = function(plsr_obj,lv_num=1,sd=3,frame=1){
 plot_perm_results=function(plsr_obj,...,alpha = NULL,main = "Permutation Testing Results",lwd=2,col="red"){
   #TODO: maybe always limit to 0 to 1. When all p values are low or high, you cannot see any difference and also not the significance line
   lv_names = paste("LV", 1:nrow(plsr_obj$decomposition$D))
-  barplot(plsr_obj$permutation$p_values,names.arg = lv_names,main=main,ylab="P-Value",...)
+  barplot(plsr_obj$permutation$p_values,names.arg = lv_names,main=main,ylab="p-value",...)
   if (is.null(alpha)) abline(h=plsr_obj$permutation$alpha,lwd=lwd, col=col) else abline(h=alpha,lwd=lwd, col=col)
 }
 
@@ -215,6 +219,7 @@ plot_perm_distr = function(plsr_obj,..., alpha= NULL,lwd=2,col="red"){
   par(mfrow=old_setting)
 }
 
+#' @export
 print.plsr=function(x,...){
   cat("\n")
   cat("plsr object\n") #TODO: dimensions of orig data
@@ -226,6 +231,7 @@ print.plsr=function(x,...){
 
 #TODO: stimmt noch nicht ganz
 #forward(backward(x)) = x sollte gelten. Tut es aber nicht
+#' @export
 predict.plsr=function(object,new_data,direction="forward",...){
   if (class(new_data)=="data.frame"){
     new_data=as.matrix(new_data)
@@ -278,7 +284,7 @@ predict.plsr=function(object,new_data,direction="forward",...){
 #' @param scale Scaling of X and Y (Boolean)
 #' @param verbose Provides additional output
 #' @param alpha The significance level
-#' @return A PLS Object
+#' @return A plsr Object
 #' @export
 pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F, alpha=0.05){
   #TODO: should this also work if X or Y only have one dimensions? IF so, need to make it work
@@ -385,8 +391,8 @@ pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F, alpha=0.05){
   #organize output
   precision = permutation_precision(p_vals,n_perm)
   decomp = list(U=U,V=V,D=diag(D),LX=LX,LY=LY)
-  perm = list(D_perm= D_perm_vals, p_values=p_vals, alpha=alpha, precision=precision)
-  bootstrp = list(sv_se=sv_se, D_boot= D_boot_vals, U_boot= U_boot_vals,V_boot= V_boot_vals, U_SE = U_SE,V_SE=V_SE)
+  perm = list(n_perm=n_perm,D_perm= D_perm_vals, p_values=p_vals, alpha=alpha, precision=precision)
+  bootstrp = list(n_boot=n_boot,sv_se=sv_se, D_boot= D_boot_vals, U_boot= U_boot_vals,V_boot= V_boot_vals, U_SE = U_SE,V_SE=V_SE)
 
   X_mean = attr(X,"scaled:center")
   X_scale = attr(X,"scaled:scale")
@@ -403,14 +409,16 @@ pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F, alpha=0.05){
   return(output)
 }
 
+#TODO: document
+#' @export
 summary.plsr=function(object,...){
   cat("\n")
   cat("plsr object\n\n") #TODO: dimensions of orig data
-  cat("Permutation iterations:", object$call$n_perm,"\n")#TODO: save this as actual value
+  cat("Permutation iterations:", object$permutation$n_perm,"\n")#TODO: save this as actual value
   cat("P_values:\n")
   print(object$permutation$p_values)
   cat("\n")
-  cat("Bootstrap iterations:", object$call$n_boot, "\n")
+  cat("Bootstrap iterations:", object$bootstrapping$n_boot, "\n")
   cat("\n")
   if(dim(object$decomposition$U)[1]<11 && dim(object$decomposition$U)[2]<11){
     cat("Loading matrix for Y-side (U)\n")

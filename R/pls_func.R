@@ -29,6 +29,7 @@ bootstrap_saliences <- function(data,indices,X_ncol, V) {
   V_boot = svd_sol$v
   D_boot = svd_sol$d
 
+  #following McIntosh and Lobaugh 2004 (https://doi.org/10.1016/j.neuroimage.2004.07.020)
   #calculate procrustes rotation
   svd_boot=svd(t(V)%*%V_boot)
   N = svd_boot$u
@@ -332,7 +333,8 @@ pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F, alpha=0.05){
     V_perm = svd_sol$v
     D_perm = svd_sol$d
 
-    #calculate procrustes rotation
+    #following McIntosh and Lobaugh 2004 (https://doi.org/10.1016/j.neuroimage.2004.07.020)
+    #calculate procrustes rotation to align solutions
     svd_perm=svd(t(V)%*%V_perm)
     N = svd_perm$u
     P = svd_perm$v

@@ -1,20 +1,22 @@
-#TODO: include Chris' JSON converter
+#TODO: include JSON converter from Chris
 #'@importFrom stats biplot sd var
 #'@importFrom graphics abline barplot hist par plot segments
 
 #' @export
 biplot.plsr = function(x,direction = "forward",LVs=c(1,2),...){
-  #TODO: do this for backwards too
   if (direction=="forward"){
     V = x$decomposition$V
     LX = x$decomposition$LX
     biplot(LX[,LVs],V[,LVs],xlab = colnames(V[,LVs])[1],ylab = colnames(V[,LVs])[2],...)
   }
-
+  if (direction=="backward"){
+    U = x$decomposition$U
+    LY = x$decomposition$LY
+    biplot(LY[,LVs],U[,LVs],xlab = colnames(U[,LVs])[1],ylab = colnames(U[,LVs])[2],...)
+  }
 }
 
 bootstrap_saliences <- function(data,indices,X_ncol, V) {
-  #TODO: find out if I can pass things by reference: would be good for X,Y,U and V
   data = data[indices,]
 
   #data contains both X and Y, so need to separate them again
@@ -46,6 +48,8 @@ bootstrap_saliences <- function(data,indices,X_ncol, V) {
 }
 
 #' Calculates the precision of the p-value estimated by permutation testing
+#'
+#' Following Ojala&Garriga (2010) "Permutation tests for studying classifier performance"
 #'
 #' @param p The p value
 #' @param k Number of permutation iterations
@@ -89,7 +93,6 @@ explained_variance=function(plsr_obj){
 #' @export
 new_plsr=function(decomp=list(),perm=list(), bootstrp=list(), sclng=list(),org_dat=list(),cl=list()){
   #TODO: stopifnots here?
-
   structure(list(decomposition=decomp, permutation=perm, bootstrapping=bootstrp, scaling=sclng,orig_data=org_dat,call=cl),class="plsr")
 }
 
@@ -101,7 +104,6 @@ loadings.plsr=function(plsr_obj){
 
 #' @export
 plot.plsr = function(x,...){
-  #TODO: think about dots that I needed to add for generic
   plot_perm_results(x)
   invisible(readline(prompt="Press [enter] for next plot"))
   plot_perm_distr(x)

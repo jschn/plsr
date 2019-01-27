@@ -12,5 +12,5 @@ permutation_precision(p, k)
 \item{k}{Number of permutation iterations}
 }
 \description{
-Calculates the precision of the p-value estimated by permutation testing
+Following Ojala&Garriga (2010) "Permutation tests for studying classifier performance"
 }

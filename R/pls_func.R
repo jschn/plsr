@@ -2,6 +2,10 @@
 #'@importFrom stats biplot sd var
 #'@importFrom graphics abline barplot hist par plot segments
 
+.onAttach <- function(libname, pkgname) {
+  packageStartupMessage("Be aware that plsr 0.0.1 contains experimental and partly untested code.\n Use cautiously.")
+}
+
 #' @export
 biplot.plsr = function(x,direction = "forward",LVs=c(1,2),...){
   if (direction=="forward"){
@@ -90,16 +94,36 @@ explained_variance=function(plsr_obj){
   return(list(ExpVarX=vars_x,ExpVarY=vars_y))
 }
 
+#' Constructor for plsr objects
+#'
+#'@param decomp List of singular value decomposition results
+#'@param perm List of permutation testing results
+#'@param bootstrp List of bootstrapping results
+#'@param sclng List of scaling paramters applied to original data
+#'@param org_dat List of original data
+#'@param cl Call of pls function
 #' @export
 new_plsr=function(decomp=list(),perm=list(), bootstrp=list(), sclng=list(),org_dat=list(),cl=list()){
   #TODO: stopifnots here?
   structure(list(decomposition=decomp, permutation=perm, bootstrapping=bootstrp, scaling=sclng,orig_data=org_dat,call=cl),class="plsr")
 }
 
-#TODO
+
+#' Print loadings of plsr object
+#'
+#'This will print the loading matrices V and U that project from original data spaces to latent space.
+#'@param x A plsr object
+#'@param mat Which matrix to print (U or V), if NULL (default) will print both
 #' @export
-loadings.plsr=function(plsr_obj){
-  print("this should display loadings")
+loadings.plsr=function(x,mat=NULL){
+  if (mat=='U' | is.null(mat)){
+    cat("Loading matrix for Y-side (U)\n")
+    print(x$decomposition$U)
+  }
+  if (mat=='V' | is.null(mat)){
+    cat("Loading matrix for X-side (V)\n")
+    print(x$decomposition$V)
+  }
 }
 
 #' @export
@@ -115,6 +139,7 @@ plot.plsr = function(x,...){
 }
 
 plot_boot_results = function(plsr_obj, sig_threshold=1.96){
+  warning("Bootstrapping functionality is still untested!")
   #saliences
   U = plsr_obj$decomposition$U
   V = plsr_obj$decomposition$V
@@ -363,6 +388,7 @@ pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F, alpha=0.05){
   }
   #bootstrapping with boot package
   cat("Bootstrapping...\n")
+  warning("Bootstrapping functionality is still untested! No guarantee for correctness! Use with extra care.")
   boot_results = boot::boot(data = cbind(X,Y),statistic = bootstrap_saliences, R=n_boot,X_ncol=ncol(X) , V=V)
   cat("Done!\n")
   #TODO: make this pretty
@@ -413,7 +439,9 @@ pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F, alpha=0.05){
   return(output)
 }
 
-#TODO: document
+#'Summary of plsr object
+#'@param object A plsr object
+#'@param ... Additional arguments
 #' @export
 summary.plsr=function(object,...){
   cat("\n")

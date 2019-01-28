@@ -1,12 +1,13 @@
 Package: plsr
 Type: Package
-Title: Pleasure - Partial Least Squares Analyses for R with Permutation Testing
-Version: 0.1.0
+Title: Pleasure - Partial Least Squares Analysis for R with Permutation Testing
+Version: 0.0.1
 Authors@R: c(
     person(c("Jan","Niklas"), "Schneider", email = "jan_schneider@live.de",role = c("aut", "cre")),
     person(c("Timothy","Raymond"), "Brick", email = "tbrick@psu.edu",role = c("aut")))          
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: Provides partial least squares analysis for the analysis of the relation 
+    between two high-dimensional data sets. Includes permutation testing and 
+    bootstrapping for resulting latent variables and several visualization functions.
 Depends: R (>= 2.10)
 License: GPL-3
 Encoding: UTF-8
@@ -16,7 +17,7 @@ Imports:
     ggplot2,
     reshape2,
     shiny
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

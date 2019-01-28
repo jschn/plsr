@@ -30,6 +30,7 @@ It features:
 The central function of the package is `pls()`. Given two matrices `X` and `Y` with arbitrary number of variables in columns and equal number of observations in rows this function will compute the latent variables that will maximize the covariance between `X` and `Y`.
 For example, a plsr object can be calculated like so:
 ```{r, results="hide"}
+library(plsr)
 plsr_obj=pls(X=rating_data,Y=tracking_data,n_perm=1000,n_boot=10)
 ```  
 ## Inspecting Results
@@ -44,6 +45,6 @@ plot(plsr_obj)
 ```
 
 ```{r, echo=FALSE, fig.width = 3.5, fig.align = "center"}
-plot_perm_results(plsr_obj)
+plsr:::plot_perm_results(plsr_obj)
 ```
 

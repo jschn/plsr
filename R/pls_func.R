@@ -193,6 +193,7 @@ plot_explained_variance=function(plsr_obj){
 #' @param lv_num An integer or list of integer specifying which latent variables to plot
 #' @param sd Range in standard deviations from +[sd] to -[sd]
 #' @param frame Which timestep to plot
+#' @export
 plot_latent_variables = function(plsr_obj,lv_num=1,sd=3,frame=1){
   U = plsr_obj$decomposition$U
   V = plsr_obj$decomposition$V
@@ -220,6 +221,7 @@ plot_latent_variables = function(plsr_obj,lv_num=1,sd=3,frame=1){
 
 }
 
+#' @export
 plot_perm_results=function(plsr_obj,...,alpha = NULL,main = "Permutation Testing Results",lwd=2,col="red"){
   #TODO: maybe always limit to 0 to 1. When all p values are low or high, you cannot see any difference and also not the significance line
   lv_names = paste("LV", 1:nrow(plsr_obj$decomposition$D))
@@ -227,6 +229,7 @@ plot_perm_results=function(plsr_obj,...,alpha = NULL,main = "Permutation Testing
   if (is.null(alpha)) abline(h=plsr_obj$permutation$alpha,lwd=lwd, col=col) else abline(h=alpha,lwd=lwd, col=col)
 }
 
+#' @export
 plot_perm_distr = function(plsr_obj,..., alpha= NULL,lwd=2,col="red"){
   n_comp = ncol(plsr_obj$decomposition$D)
   plot_dim=ceiling(sqrt(n_comp))

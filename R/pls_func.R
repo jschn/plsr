@@ -1,4 +1,3 @@
-#TODO: include JSON converter from Chris
 #'@importFrom stats biplot sd var
 #'@importFrom graphics abline barplot hist par plot segments
 
@@ -6,14 +5,28 @@
   packageStartupMessage("Be aware that plsr 0.0.1 contains experimental and partly untested code.\n Use cautiously.")
 }
 
+#'Biplot for plsr Objects
+#'
+#'Produces a biplot from a plsr object
+#'
+#' @param x The plsr object
+#' @param side The side for which the biplot should be generated. Can be "X" (default) to generate
+#'    a biplot of the loadings of X onto the latent space or "Y" for the loadings of Y.
+#' @param LVs Vector of length two which specifies the latent variables to be plotted against each other.
+#'    For example, the default LVs=c(1,2) will plot latent variable 1 against latent variable 2.
+#' @param ... optional arguments to be passed to biplot.default.
+#' @examples
+#' \dontrun{
+#' biplot(x)
+#' }
 #' @export
-biplot.plsr = function(x,direction = "forward",LVs=c(1,2),...){
-  if (direction=="forward"){
+biplot.plsr = function(x,side="X",LVs=c(1,2),...){
+  if (side=="X"){
     V = x$decomposition$V
     LX = x$decomposition$LX
     biplot(LX[,LVs],V[,LVs],xlab = colnames(V[,LVs])[1],ylab = colnames(V[,LVs])[2],...)
   }
-  if (direction=="backward"){
+  if (side=="Y"){
     U = x$decomposition$U
     LY = x$decomposition$LY
     biplot(LY[,LVs],U[,LVs],xlab = colnames(U[,LVs])[1],ylab = colnames(U[,LVs])[2],...)
@@ -57,6 +70,10 @@ bootstrap_saliences <- function(data,indices,X_ncol, V) {
 #'
 #' @param p The p value
 #' @param k Number of permutation iterations
+#' @return The precision given \code{p} and \code{k}.
+#' @examples
+#' permutation_precision(0.05,1000)
+#' @export
 permutation_precision = function(p,k){
   return(sqrt((p*(1-p)/k)))
 }
@@ -96,24 +113,34 @@ explained_variance=function(plsr_obj){
 
 #' Constructor for plsr objects
 #'
-#'@param decomp List of singular value decomposition results
-#'@param perm List of permutation testing results
-#'@param bootstrp List of bootstrapping results
-#'@param sclng List of scaling paramters applied to original data
-#'@param org_dat List of original data
-#'@param cl Call of pls function
+#' @param decomp List of singular value decomposition results
+#' @param perm List of permutation testing results
+#' @param bootstrp List of bootstrapping results
+#' @param sclng List of scaling paramters applied to original data
+#' @param org_dat List of original data
+#' @param cl Call of pls function
+#' @examples
+#' \dontrun{
+#' plsr_obj=new_plsr(d,p,b,s,o,c)
+#' }
+#'
 #' @export
 new_plsr=function(decomp=list(),perm=list(), bootstrp=list(), sclng=list(),org_dat=list(),cl=list()){
   #TODO: stopifnots here?
   structure(list(decomposition=decomp, permutation=perm, bootstrapping=bootstrp, scaling=sclng,orig_data=org_dat,call=cl),class="plsr")
 }
 
-
 #' Print loadings of plsr object
 #'
-#'This will print the loading matrices V and U that project from original data spaces to latent space.
-#'@param x A plsr object
-#'@param mat Which matrix to print (U or V), if NULL (default) will print both
+#' This will print the loading matrices V and U that project from original data spaces X and Y to latent space.
+#' @param x A plsr object
+#' @param mat Which matrix to print (U or V), if NULL (default) will print both
+#' @examples
+#' \dontrun{
+#' loadings(x)
+#' loadings(x,"U")
+#' loadings(x,"V")
+#' }
 #' @export
 loadings.plsr=function(x,mat=NULL){
   if (mat=='U' | is.null(mat)){
@@ -126,6 +153,22 @@ loadings.plsr=function(x,mat=NULL){
   }
 }
 
+#'  Plot function for plsr objects
+#'
+#'  Plots information about a plsr object. The following plots will be generated:
+#' \itemize{
+#' \item barplot of p-values of latent variables estimated via permuatation testing
+#' \item Histograms of the distributions of latent variables derived via permutation testing
+#' \item A plot showing the effect of the first latent variable on the original data spaces
+#' \item Several plots to visualize bootstrapping results
+#' }
+#'
+#' @param x The plsr object.
+#' @examples
+#' \dontrun{
+#' plot(x)
+#' }
+#'
 #' @export
 plot.plsr = function(x,...){
   plot_perm_results(x)
@@ -189,36 +232,46 @@ plot_explained_variance=function(plsr_obj){
 
 #' Plots latent variables
 #'
+#' This function will plot the effects of increasing and decreasing one or several latent variables by the specified standard deviation.
+#'
 #' @param plsr_obj A plsr object
-#' @param lv_num An integer or list of integer specifying which latent variables to plot
-#' @param sd Range in standard deviations from +[sd] to -[sd]
-#' @param frame Which timestep to plot
+#' @param lv_num An integer or list of integer specifying which latent variables to plot.
+#' @param sd Range in standard deviations from +[sd] to -[sd].
+#' @param FUN A vector containing two functions, which will be used for plotting. Default is c(barplot,barplot).
+#' @param args1 Arguments for the plotting function in \code{FUN[1]}
+#' @param args2 Arguments for the plotting function in \code{FUN[2]}
+#' @examples
+#' \dontrun{
+#' plot_latent_variables(plsr_obj)
+#' plot_latent_variables(plsr_obj,lv=1:2, sd=2, FUN=c(customplot,barplot))
+#' }
+#'
 #' @export
-plot_latent_variables = function(plsr_obj,lv_num=1,sd=3,frame=1){
+plot_latent_variables = function(plsr_obj, lv_num=1, sd=3, FUN=c(barplot,barplot), args1=NULL, args2=NULL){
   U = plsr_obj$decomposition$U
   V = plsr_obj$decomposition$V
   D = plsr_obj$decomposition$D
   scaling = plsr_obj$scaling
 
-  #steps = -sd:sd
   steps = c(-sd,0,sd)
   num_steps = length(steps)
   old_setting = par()$mfrow
   par(mfrow=c(2,num_steps))
+  F1 = FUN[[1]]
+  F2 = FUN[[2]]
 
   for (i in 1:num_steps){
     plot_title = paste(steps[i],"SDs")
-    plot_frame(rowSums(cbind((U%*%sqrt(D)*steps[i])[,lv_num]))*scaling$Y_scale+scaling$Y_mean,lim=F,title=plot_title,single_frame = frame)
-    #plot_frame(rowSums(cbind((U*steps[i])[,lv_num]))*scaling$Y_scale+scaling$Y_mean,lim=F,title=plot_title,single_frame = frame)
+    Y_side=rowSums(cbind((U%*%sqrt(D)*steps[i])[,lv_num]))*scaling$Y_scale+scaling$Y_mean
+    args = c(list(Y_side,main=plot_title),args1)
+    do.call(F1,args)
   }
   for (i in 1:num_steps){
-    #barplot(rowSums(cbind((V%*%sqrt(D)*steps[i])[,lv_num]))*scaling$X_scale+scaling$X_mean,cex.axis = 1.5,font=2)
-    barplot(rowSums(cbind((V*steps[i])[,lv_num]))*scaling$X_scale+scaling$X_mean,cex.axis = 1.5,font=2)
+    X_side = rowSums(cbind((V*steps[i])[,lv_num]))*scaling$X_scale+scaling$X_mean
+    args = c(list(X_side),args2)
+    do.call(F2,args)
   }
-
   par(mfrow=old_setting)
-
-
 }
 
 #' @export
@@ -301,23 +354,21 @@ predict.plsr=function(object,new_data,direction="forward",...){
 
 }
 
-
-
 #TODO: options to discard results from permutation and bootstrap steps
 #TODO: need to provide examples for doc
 
 #' Run partial least squares analysis
 #'
-#' @param X A matrix of m observations on n dimensions
-#' @param Y A matrix of m observations on n dimensions
-#' @param n_perm Number of permutation iterations
-#' @param n_boot Number of bootstrap iterations
-#' @param scale Scaling of X and Y (Boolean)
-#' @param verbose Provides additional output
-#' @param alpha The significance level
-#' @return A plsr Object
+#' @param X A matrix of m observations on n dimensions.
+#' @param Y A matrix of m observations on n dimensions.
+#' @param n_perm Number of permutation iterations.
+#' @param n_boot Number of bootstrap iterations.
+#' @param scale Scaling of X and Y (Boolean).
+#' @param verbose Provides additional output.
+#' @param alpha The significance level.
+#' @return A plsr Object.
 #' @export
-pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F, alpha=0.05){
+pls = function(X,Y,n_perm=100,n_boot=100, scale=T, verbose=F, alpha=0.05){
   #TODO: should this also work if X or Y only have one dimensions? IF so, need to make it work
 
 
@@ -444,9 +495,8 @@ pls = function(X,Y,n_perm=10,n_boot=10, scale=T, verbose=F, alpha=0.05){
 
 #'Summary of plsr object
 #'@param object A plsr object
-#'@param ... Additional arguments
 #' @export
-summary.plsr=function(object,...){
+summary.plsr=function(object){
   cat("\n")
   cat("plsr object\n\n") #TODO: dimensions of orig data
   cat("Permutation iterations:", object$permutation$n_perm,"\n")#TODO: save this as actual value

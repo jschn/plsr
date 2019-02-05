@@ -3,7 +3,7 @@ concat_into_vector=function(frame_matrix){
   return(as.vector(t(frame_matrix)))
 }
 
-plot_frame=function(frame_vec,title="",lim=T, single_frame=NULL){
+plot_frame=function(frame_vec,lim=T, single_frame=NULL,...){
 
   connections<- NULL;rm(connections); utils::data(connections); #to get rid of R CMD check complaints about using connections
 
@@ -23,14 +23,14 @@ plot_frame=function(frame_vec,title="",lim=T, single_frame=NULL){
       x,
       y,
       ylim=c(-0.2,0.13),xlim=c(-0.2,0.2),
-      xlab="X", ylab="Y", main=title
+      xlab="X", ylab="Y", ...
     )
   }
   else{
     plot(
       x,
       y,
-      xlab="X", ylab="Y", main=title
+      xlab="X", ylab="Y", ...
     )
   }
 
@@ -40,4 +40,10 @@ plot_frame=function(frame_vec,title="",lim=T, single_frame=NULL){
     x[connections[,2]],
     y[connections[,2]]
   )
+}
+
+plot_latent_variables_face=function(plsr_obj,frame,...){
+  args1=list(single_frame=frame, lim=T)
+  args2=list(cex.axis = 1.5,font=2)
+  plot_latent_variables(plsr_obj,FUN=c(plot_frame,barplot),args1=args1,args2=args2,...)
 }

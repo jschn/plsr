@@ -4,26 +4,26 @@
 \alias{pls}
 \title{Run partial least squares analysis}
 \usage{
-pls(X, Y, n_perm = 10, n_boot = 10, scale = T, verbose = F,
+pls(X, Y, n_perm = 100, n_boot = 100, scale = T, verbose = F,
   alpha = 0.05)
 }
 \arguments{
-\item{X}{A matrix of m observations on n dimensions}
+\item{X}{A matrix of m observations on n dimensions.}
 
-\item{Y}{A matrix of m observations on n dimensions}
+\item{Y}{A matrix of m observations on n dimensions.}
 
-\item{n_perm}{Number of permutation iterations}
+\item{n_perm}{Number of permutation iterations.}
 
-\item{n_boot}{Number of bootstrap iterations}
+\item{n_boot}{Number of bootstrap iterations.}
 
-\item{scale}{Scaling of X and Y (Boolean)}
+\item{scale}{Scaling of X and Y (Boolean).}
 
-\item{verbose}{Provides additional output}
+\item{verbose}{Provides additional output.}
 
-\item{alpha}{The significance level}
+\item{alpha}{The significance level.}
 }
 \value{
-A plsr Object
+A plsr Object.
 }
 \description{
 Run partial least squares analysis

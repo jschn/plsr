@@ -11,6 +11,12 @@ permutation_precision(p, k)
 
 \item{k}{Number of permutation iterations}
 }
+\value{
+The precision given \code{p} and \code{k}.
+}
 \description{
 Following Ojala&Garriga (2010) "Permutation tests for studying classifier performance"
+}
+\examples{
+permutation_precision(0.05,1000)
 }

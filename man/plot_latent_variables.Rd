@@ -4,17 +4,29 @@
 \alias{plot_latent_variables}
 \title{Plots latent variables}
 \usage{
-plot_latent_variables(plsr_obj, lv_num = 1, sd = 3, frame = 1)
+plot_latent_variables(plsr_obj, lv_num = 1, sd = 3, FUN = c(barplot,
+  barplot), args1 = NULL, args2 = NULL)
 }
 \arguments{
 \item{plsr_obj}{A plsr object}
 
-\item{lv_num}{An integer or list of integer specifying which latent variables to plot}
+\item{lv_num}{An integer or list of integer specifying which latent variables to plot.}
 
-\item{sd}{Range in standard deviations from +[sd] to -[sd]}
+\item{sd}{Range in standard deviations from +[sd] to -[sd].}
 
-\item{frame}{Which timestep to plot}
+\item{FUN}{A vector containing two functions, which will be used for plotting. Default is c(barplot,barplot).}
+
+\item{args1}{Arguments for the plotting function in \code{FUN[1]}}
+
+\item{args2}{Arguments for the plotting function in \code{FUN[2]}}
 }
 \description{
-Plots latent variables
+This function will plot the effects of increasing and decreasing one or several latent variables by the specified standard deviation.
+}
+\examples{
+\dontrun{
+plot_latent_variables(plsr_obj)
+plot_latent_variables(plsr_obj,lv=1:2, sd=2, FUN=c(customplot,barplot))
+}
+
 }

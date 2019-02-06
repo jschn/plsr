@@ -15,7 +15,7 @@ permutation_precision(p, k)
 The precision given \code{p} and \code{k}.
 }
 \description{
-Following Ojala&Garriga (2010) "Permutation tests for studying classifier performance"
+Following Ojala&Garriga (2010): "Permutation tests for studying classifier performance"
 }
 \examples{
 permutation_precision(0.05,1000)

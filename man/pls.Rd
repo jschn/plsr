@@ -8,23 +8,31 @@ pls(X, Y, n_perm = 100, n_boot = 100, scale = T, verbose = F,
   alpha = 0.05)
 }
 \arguments{
-\item{X}{A matrix of m observations on n dimensions.}
+\item{X}{A matrix of m observations on n_x variables.}
 
-\item{Y}{A matrix of m observations on n dimensions.}
+\item{Y}{A matrix of m observations on n_y dimensions.}
 
-\item{n_perm}{Number of permutation iterations.}
+\item{n_perm}{Number of permutation iterations. Default is 100.}
 
-\item{n_boot}{Number of bootstrap iterations.}
+\item{n_boot}{Number of bootstrap iterations. Default is 100.}
 
 \item{scale}{Scaling of X and Y (Boolean).}
 
 \item{verbose}{Provides additional output.}
 
-\item{alpha}{The significance level.}
+\item{alpha}{The significance level for permutation testing.}
 }
 \value{
 A plsr Object.
 }
 \description{
-Run partial least squares analysis
+This is the main function of the plsr package. It will calculate a partial least squares solution
+for the provided data and perform permutation testing and bootstrapping on the resulting latent variables.
+Results will be saved as a plsr object.
+}
+\examples{
+X=matrix(rnorm(300), ncol = 3)
+Y=matrix(rnorm(1000), ncol = 10)
+pls(X,Y)
+pls(X,Y, n_perm = 10, n_boot = 10)
 }

@@ -2,7 +2,7 @@
 #'@importFrom graphics abline barplot hist par plot segments
 
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("Be aware that plsr 0.0.1 contains experimental and partly untested code.\n Use cautiously.")
+  packageStartupMessage("Be aware that plsr 0.0.1 contains experimental and partly untested code.\nUse cautiously.")
 }
 
 #'Biplot for plsr Objects
@@ -66,7 +66,7 @@ bootstrap_saliences <- function(data,indices,X_ncol, V) {
 
 #' Calculates the precision of the p-value estimated by permutation testing
 #'
-#' Following Ojala&Garriga (2010) "Permutation tests for studying classifier performance"
+#' Following Ojala&Garriga (2010): "Permutation tests for studying classifier performance"
 #'
 #' @param p The p value
 #' @param k Number of permutation iterations
@@ -79,9 +79,16 @@ permutation_precision = function(p,k){
 }
 
 
-#' Calculates explained variance per component of the original data sets X and Y
+#' Calculate variance explained for plsr object
+#'
+#' Calculates explained variance per component of the original data sets X and Y.
 #'
 #' @param plsr_obj A plsr object
+#' @return A list containing the elements ExpVarX and ExpVarY, which contain the explained variances for X and Y respectively
+#' @examples
+#' \dontrun{
+#' explained_variance(plsr_object)
+#' }
 explained_variance=function(plsr_obj){
   Y= plsr_obj$orig_data$Y
   X = plsr_obj$orig_data$X
@@ -123,7 +130,6 @@ explained_variance=function(plsr_obj){
 #' \dontrun{
 #' plsr_obj=new_plsr(d,p,b,s,o,c)
 #' }
-#'
 #' @export
 new_plsr=function(decomp=list(),perm=list(), bootstrp=list(), sclng=list(),org_dat=list(),cl=list()){
   #TODO: stopifnots here?
@@ -164,13 +170,14 @@ loadings.plsr=function(x,mat=NULL){
 #' }
 #'
 #' @param x The plsr object.
+#' @param ... Further arguments.
 #' @examples
 #' \dontrun{
 #' plot(x)
 #' }
 #'
 #' @export
-plot.plsr = function(x,...){
+plot.plsr = function(x, ...){
   plot_perm_results(x)
   invisible(readline(prompt="Press [enter] for next plot"))
   plot_perm_distr(x)
@@ -219,6 +226,16 @@ plot_boot_results = function(plsr_obj, sig_threshold=1.96){
     ggplot2::ggtitle("Significant V Elements"))
 }
 
+
+#' Plot explained variance of plsr object
+#'
+#' Calculates and plots the variance explained in the original data X and Y by each additional latent variable.
+#'
+#' @param plsr_obj The plsr object.
+#'
+#' @examples
+#' \dontrun{plot_explained_variance(plsr_obj)}
+#'
 plot_explained_variance=function(plsr_obj){
   exp_list = explained_variance(plsr_obj)
   par(mfrow = c(1,2))
@@ -274,6 +291,22 @@ plot_latent_variables = function(plsr_obj, lv_num=1, sd=3, FUN=c(barplot,barplot
   par(mfrow=old_setting)
 }
 
+#' Plot permuation results for plsr object
+#'
+#' Plots the p-values for the latent variables estimated through permutation testing.
+#'
+#' @param plsr_obj A plsr_obj.
+#' @param ... Additional arguments passed to \code{barplot}.
+#' @param alpha The significance threshold used. Will be indicated in the plot by a horizontal line.
+#'    If NULL (default), the alpha value of the plsr object will be used.
+#' @param main The title of the plot.
+#' @param lwd The line width of the line indicating alpha.
+#' @param col The color of the line indicating alpha.
+#'
+#' @examples
+#' \dontrun{
+#' plot_perm_results(plsr_obj)
+#' }
 #' @export
 plot_perm_results=function(plsr_obj,...,alpha = NULL,main = "Permutation Testing Results",lwd=2,col="red"){
   #TODO: maybe always limit to 0 to 1. When all p values are low or high, you cannot see any difference and also not the significance line
@@ -282,8 +315,17 @@ plot_perm_results=function(plsr_obj,...,alpha = NULL,main = "Permutation Testing
   if (is.null(alpha)) abline(h=plsr_obj$permutation$alpha,lwd=lwd, col=col) else abline(h=alpha,lwd=lwd, col=col)
 }
 
+#' Plots null distributions constructed via permutation testing
+#'
+#' Plots histograms of the null distribution for values of singular values of latent variables constructed via permutation testing.
+#' @param plsr_obj A plsr object.
+#' @param ... Further parameters to be passed to \code{hist}.
+#' @param lwd Line width of vertical line indicating the estimated value of the singular value.
+#' @param col Color of the vertial line indicating the estimated value of the singular value.
+#' @examples
+#' \dontrun{plot_perm_distr(plsr_obj)}
 #' @export
-plot_perm_distr = function(plsr_obj,..., alpha= NULL,lwd=2,col="red"){
+plot_perm_distr = function(plsr_obj,..., lwd=2,col="red"){
   n_comp = ncol(plsr_obj$decomposition$D)
   plot_dim=ceiling(sqrt(n_comp))
   old_setting = par()$mfrow
@@ -298,23 +340,43 @@ plot_perm_distr = function(plsr_obj,..., alpha= NULL,lwd=2,col="red"){
     hist_title = paste("Null Distribution of Singular Value", i)
     xlab_name = paste("Values of Singular Value", i)
     hist(plsr_obj$permutation$D_perm[,i],...,main = hist_title, xlim = xlim_range, xlab = xlab_name)
-    if (is.null(alpha)) abline(v=plsr_obj$decomposition$D[i,i],lwd=lwd, col=col) else abline(v=plsr_obj$decomposition$D[i,i],lwd=lwd, col=col)
+    abline(v=plsr_obj$decomposition$D[i,i],lwd=lwd, col=col)
   }
   par(mfrow=old_setting)
 }
 
+#' Print plsr object
+#'
+#' Prints information about a plsr object.
+#'
+#' @param x A plsr object.
+#' @param ... Further arguments.
+#'
 #' @export
 print.plsr=function(x,...){
-  cat("\n")
-  cat("plsr object\n") #TODO: dimensions of orig data
-  cat("\n")
   cat("Call:\n")
   print(x$call)
+  cat("\n")
+  cat("X:",ncol(x$orig_data$X), "variables and", nrow(x$orig_data$X), "observations")
+  cat("\n")
+  cat("Y:",ncol(x$orig_data$Y), "variables and", nrow(x$orig_data$Y), "observations")
   cat("\n")
 }
 
 #TODO: stimmt noch nicht ganz
 #forward(backward(x)) = x sollte gelten. Tut es aber nicht
+#' Predict from a plsr object
+#'
+#' This function can be used to make predictions from one original data space to the other.
+#' Prediction direction can be forward, meaning X to Y direction and backward, meaning Y to X prediction.
+#'
+#' @param object A plsr object.
+#' @param new_data The data from which you want to predict.
+#' @param direction The direction of prediction. Default is "forward" meaning X to Y. Every other argument will result in backward prediction.
+#' @param ... Additional arguments.
+#'
+#' @examples
+#' \dontrun{predict(plsr_obj,rnorm(10),"forward")}
 #' @export
 predict.plsr=function(object,new_data,direction="forward",...){
   if (class(new_data)=="data.frame"){
@@ -342,6 +404,7 @@ predict.plsr=function(object,new_data,direction="forward",...){
     return(pred_scaled_back)
   }
   else{
+    warning("Backward prediction is untested and might give incorrect results!")
     y_centered = sweep(new_data,2,scaling$Y_mean,"-")
     y_scaled = sweep(y_centered,2,scaling$Y_scale,"/")
     y_u_space = y_scaled%*%U #vector in latent space, TODO: this should be transposed (maybe?)
@@ -359,14 +422,23 @@ predict.plsr=function(object,new_data,direction="forward",...){
 
 #' Run partial least squares analysis
 #'
-#' @param X A matrix of m observations on n dimensions.
-#' @param Y A matrix of m observations on n dimensions.
-#' @param n_perm Number of permutation iterations.
-#' @param n_boot Number of bootstrap iterations.
+#' This is the main function of the plsr package. It will calculate a partial least squares solution
+#' for the provided data and perform permutation testing and bootstrapping on the resulting latent variables.
+#' Results will be saved as a plsr object.
+#'
+#' @param X A matrix of m observations on n_x variables.
+#' @param Y A matrix of m observations on n_y dimensions.
+#' @param n_perm Number of permutation iterations. Default is 100.
+#' @param n_boot Number of bootstrap iterations. Default is 100.
 #' @param scale Scaling of X and Y (Boolean).
 #' @param verbose Provides additional output.
-#' @param alpha The significance level.
+#' @param alpha The significance level for permutation testing.
 #' @return A plsr Object.
+#' @examples
+#' X=matrix(rnorm(300), ncol = 3)
+#' Y=matrix(rnorm(1000), ncol = 10)
+#' pls(X,Y)
+#' pls(X,Y, n_perm = 10, n_boot = 10)
 #' @export
 pls = function(X,Y,n_perm=100,n_boot=100, scale=T, verbose=F, alpha=0.05){
   #TODO: should this also work if X or Y only have one dimensions? IF so, need to make it work
@@ -493,13 +565,17 @@ pls = function(X,Y,n_perm=100,n_boot=100, scale=T, verbose=F, alpha=0.05){
   return(output)
 }
 
-#'Summary of plsr object
-#'@param object A plsr object
+#' Summary of plsr object
+#'
+#' @param object A plsr object.
+#' @param ... Further arguments.
+#' @examples
+#' \dontrun{
+#' summary(plsr_object)
+#' }
 #' @export
-summary.plsr=function(object){
-  cat("\n")
-  cat("plsr object\n\n") #TODO: dimensions of orig data
-  cat("Permutation iterations:", object$permutation$n_perm,"\n")#TODO: save this as actual value
+summary.plsr=function(object, ...){
+  cat("Permutation iterations:", object$permutation$n_perm,"\n")
   cat("P_values:\n")
   print(object$permutation$p_values)
   cat("\n")

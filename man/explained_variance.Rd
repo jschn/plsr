@@ -2,13 +2,21 @@
 % Please edit documentation in R/pls_func.R
 \name{explained_variance}
 \alias{explained_variance}
-\title{Calculates explained variance per component of the original data sets X and Y}
+\title{Calculate variance explained for plsr object}
 \usage{
 explained_variance(plsr_obj)
 }
 \arguments{
 \item{plsr_obj}{A plsr object}
 }
+\value{
+A list containing the elements ExpVarX and ExpVarY, which contain the explained variances for X and Y respectively
+}
 \description{
-Calculates explained variance per component of the original data sets X and Y
+Calculates explained variance per component of the original data sets X and Y.
+}
+\examples{
+\dontrun{
+explained_variance(plsr_object)
+}
 }

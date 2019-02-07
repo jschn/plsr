@@ -332,7 +332,7 @@ plot_perm_distr = function(plsr_obj,..., lwd=2,col="red"){
   par(mfrow=c(plot_dim,plot_dim))
 
   for (i in 1:n_comp){
-    #ensure that real singular value can always be drawn in the plot by setting the xlim parameter accordingly
+    #ensure that the real singular value can always be drawn in the plot by setting the xlim parameter accordingly
     xlim_range = range(plsr_obj$permutation$D_perm[,i])
     if (xlim_range[2]<plsr_obj$decomposition$D[i,i]){
       xlim_range[2]= plsr_obj$decomposition$D[i,i]+1
@@ -363,8 +363,8 @@ print.plsr=function(x,...){
   cat("\n")
 }
 
-#TODO: stimmt noch nicht ganz
-#forward(backward(x)) = x sollte gelten. Tut es aber nicht
+# TODO: check math of backward prediction
+# forward(backward(x)) = x should hold
 #' Predict from a plsr object
 #'
 #' This function can be used to make predictions from one original data space to the other.
@@ -392,7 +392,6 @@ predict.plsr=function(object,new_data,direction="forward",...){
   V=object$decomposition$V #matrix for projection of ratings into latent space
   scaling = object$scaling
 
-
   if (direction=="forward"){#X to Y
     x_centered = sweep(new_data,2,scaling$X_mean,"-")
     x_scaled = sweep(x_centered,2,scaling$X_scale,"/")
@@ -417,8 +416,7 @@ predict.plsr=function(object,new_data,direction="forward",...){
 
 }
 
-#TODO: options to discard results from permutation and bootstrap steps
-#TODO: need to provide examples for doc
+#TODO: options to discard results from permutation and bootstrap steps to keep plsr objects small
 
 #' Run partial least squares analysis
 #'
@@ -442,8 +440,6 @@ predict.plsr=function(object,new_data,direction="forward",...){
 #' @export
 pls = function(X,Y,n_perm=100,n_boot=100, scale=T, verbose=F, alpha=0.05){
   #TODO: should this also work if X or Y only have one dimensions? IF so, need to make it work
-
-
   if (n_perm<10) n_perm=10
   if (n_boot<10) n_boot=10
 
@@ -523,21 +519,20 @@ pls = function(X,Y,n_perm=100,n_boot=100, scale=T, verbose=F, alpha=0.05){
   U_boot_vals = boot_results$t[,(length(D)+1):((nrow(U)*ncol(U))+length(D))]
   V_boot_vals = boot_results$t[,(((nrow(U)*ncol(U))+length(D))+1):(ncol(boot_results$t))]
 
-
   sv_se = c()
   for (v in 1:ncol(D_boot_vals)){
-    new_sv_se=(sqrt((n_boot-1)/n_boot) * sd(D_boot_vals[,v]))#using uncorrected sd here because we have access to the population, correct?
+    new_sv_se=(sqrt((n_boot-1)/n_boot) * sd(D_boot_vals[,v]))#using uncorrected sd here because we have access to the population
     sv_se=c(sv_se,new_sv_se)
   }
 
   u_se = rep(NA, ncol(U)*nrow(U))
   for (v in 1:ncol(U_boot_vals)){
-    u_se[v]=(sqrt((n_boot-1)/n_boot) * sd(U_boot_vals[,v])) #using uncorrected sd here because we have access to the population, correct?
+    u_se[v]=(sqrt((n_boot-1)/n_boot) * sd(U_boot_vals[,v])) #using uncorrected sd here because we have access to the population
   }
 
   v_se = rep(NA, ncol(V)*nrow(V))
   for (v in 1:ncol(V_boot_vals)){
-    v_se[v]=(sqrt((n_boot-1)/n_boot) * sd(V_boot_vals[,v])) #using uncorrected sd here because we have access to the population, correct?
+    v_se[v]=(sqrt((n_boot-1)/n_boot) * sd(V_boot_vals[,v])) #using uncorrected sd here because we have access to the population
   }
 
   #reshape linearized V and U standard error matrices again

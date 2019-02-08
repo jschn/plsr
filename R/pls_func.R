@@ -321,11 +321,12 @@ plot_perm_results=function(plsr_obj,...,alpha = NULL,main = "Permutation Testing
 #' @param plsr_obj A plsr object.
 #' @param ... Further parameters to be passed to \code{hist}.
 #' @param lwd Line width of vertical line indicating the estimated value of the singular value.
-#' @param col Color of the vertial line indicating the estimated value of the singular value.
+#' @param bar_col Color of the bars in the histograms.
+#' @param line_col Color of the vertial line indicating the estimated value of the singular value.
 #' @examples
 #' \dontrun{plot_perm_distr(plsr_obj)}
 #' @export
-plot_perm_distr = function(plsr_obj,..., lwd=2,col="red"){
+plot_perm_distr = function(plsr_obj,..., lwd=2,bar_col="grey", line_col="red"){
   n_comp = ncol(plsr_obj$decomposition$D)
   plot_dim=ceiling(sqrt(n_comp))
   old_setting = par()$mfrow
@@ -339,8 +340,8 @@ plot_perm_distr = function(plsr_obj,..., lwd=2,col="red"){
     }
     hist_title = paste("Null Distribution of Singular Value", i)
     xlab_name = paste("Values of Singular Value", i)
-    hist(plsr_obj$permutation$D_perm[,i],...,main = hist_title, xlim = xlim_range, xlab = xlab_name)
-    abline(v=plsr_obj$decomposition$D[i,i],lwd=lwd, col=col)
+    hist(plsr_obj$permutation$D_perm[,i],...,main = hist_title, xlim = xlim_range, xlab = xlab_name, col = bar_col)
+    abline(v=plsr_obj$decomposition$D[i,i],lwd=lwd, col=line_col)
   }
   par(mfrow=old_setting)
 }

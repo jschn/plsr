@@ -4,7 +4,8 @@
 \alias{plot_perm_distr}
 \title{Plots null distributions constructed via permutation testing}
 \usage{
-plot_perm_distr(plsr_obj, ..., lwd = 2, col = "red")
+plot_perm_distr(plsr_obj, ..., lwd = 2, bar_col = "grey",
+  line_col = "red")
 }
 \arguments{
 \item{plsr_obj}{A plsr object.}
@@ -13,7 +14,9 @@ plot_perm_distr(plsr_obj, ..., lwd = 2, col = "red")
 
 \item{lwd}{Line width of vertical line indicating the estimated value of the singular value.}
 
-\item{col}{Color of the vertial line indicating the estimated value of the singular value.}
+\item{bar_col}{Color of the bars in the histograms.}
+
+\item{line_col}{Color of the vertial line indicating the estimated value of the singular value.}
 }
 \description{
 Plots histograms of the null distribution for values of singular values of latent variables constructed via permutation testing.

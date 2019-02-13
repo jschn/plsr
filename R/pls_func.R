@@ -89,6 +89,7 @@ permutation_precision = function(p,k){
 #' \dontrun{
 #' explained_variance(plsr_object)
 #' }
+#' @export
 explained_variance=function(plsr_obj){
   Y= plsr_obj$orig_data$Y
   X = plsr_obj$orig_data$X
@@ -236,6 +237,7 @@ plot_boot_results = function(plsr_obj, sig_threshold=1.96){
 #' @examples
 #' \dontrun{plot_explained_variance(plsr_obj)}
 #'
+#' @export
 plot_explained_variance=function(plsr_obj){
   exp_list = explained_variance(plsr_obj)
   par(mfrow = c(1,2))

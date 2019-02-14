@@ -21,7 +21,9 @@ For example, the default LVs=c(1,2) will plot latent variable 1 against latent v
 Produces a biplot from a plsr object
 }
 \examples{
-\dontrun{
-biplot(x)
+plsr_obj = pls(rating_data,tracking_data,10,10)
+biplot(plsr_obj)
+\donttest{
+biplot(plsr_obj, LV=c(2,3), side="Y")
 }
 }

@@ -25,7 +25,8 @@ If NULL (default), the alpha value of the plsr object will be used.}
 Plots the p-values for the latent variables estimated through permutation testing.
 }
 \examples{
-\dontrun{
+\donttest{
+plsr_obj = pls(rating_data,tracking_data)
 plot_perm_results(plsr_obj)
 }
 }

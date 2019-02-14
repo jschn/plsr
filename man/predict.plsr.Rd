@@ -20,5 +20,10 @@ This function can be used to make predictions from one original data space to th
 Prediction direction can be forward, meaning X to Y direction and backward, meaning Y to X prediction.
 }
 \examples{
-\dontrun{predict(plsr_obj,rnorm(10),"forward")}
+\donttest{
+plsr_obj = pls(rating_data,tracking_data)
+prediction=predict(plsr_obj,runif(7,1,101),"forward")
+#visualizing results
+plsr:::plot_frame(prediction)
+}
 }

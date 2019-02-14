@@ -19,4 +19,6 @@ Following Ojala&Garriga (2010): "Permutation tests for studying classifier perfo
 }
 \examples{
 permutation_precision(0.05,1000)
+permutation_precision(0.01,1000)
+permutation_precision(0.01,100)
 }

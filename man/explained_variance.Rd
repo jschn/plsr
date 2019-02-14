@@ -16,7 +16,6 @@ A list containing the elements ExpVarX and ExpVarY, which contain the explained 
 Calculates explained variance per component of the original data sets X and Y.
 }
 \examples{
-\dontrun{
+plsr_object = pls(rating_data,tracking_data,10,10)
 explained_variance(plsr_object)
-}
 }

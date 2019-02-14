@@ -16,8 +16,10 @@
 #'    For example, the default LVs=c(1,2) will plot latent variable 1 against latent variable 2.
 #' @param ... optional arguments to be passed to biplot.default.
 #' @examples
-#' \dontrun{
-#' biplot(x)
+#' plsr_obj = pls(rating_data,tracking_data,10,10)
+#' biplot(plsr_obj)
+#' \donttest{
+#' biplot(plsr_obj, LV=c(2,3), side="Y")
 #' }
 #' @export
 biplot.plsr = function(x,side="X",LVs=c(1,2),...){
@@ -73,6 +75,8 @@ bootstrap_saliences <- function(data,indices,X_ncol, V) {
 #' @return The precision given \code{p} and \code{k}.
 #' @examples
 #' permutation_precision(0.05,1000)
+#' permutation_precision(0.01,1000)
+#' permutation_precision(0.01,100)
 #' @export
 permutation_precision = function(p,k){
   return(sqrt((p*(1-p)/k)))
@@ -86,9 +90,8 @@ permutation_precision = function(p,k){
 #' @param plsr_obj A plsr object
 #' @return A list containing the elements ExpVarX and ExpVarY, which contain the explained variances for X and Y respectively
 #' @examples
-#' \dontrun{
+#' plsr_object = pls(rating_data,tracking_data,10,10)
 #' explained_variance(plsr_object)
-#' }
 #' @export
 explained_variance=function(plsr_obj){
   Y= plsr_obj$orig_data$Y
@@ -128,9 +131,9 @@ explained_variance=function(plsr_obj){
 #' @param org_dat List of original data
 #' @param cl Call of pls function
 #' @examples
-#' \dontrun{
-#' plsr_obj=new_plsr(d,p,b,s,o,c)
-#' }
+#' #Creating an empty plsr object
+#' d=p=b=s=o=c = list()
+#' plsr_obj=new_plsr(decomp=d,perm=p,bootstrp=b,sclng=s,org_dat=o,cl=c)
 #' @export
 new_plsr=function(decomp=list(),perm=list(), bootstrp=list(), sclng=list(),org_dat=list(),cl=list()){
   #TODO: stopifnots here?
@@ -142,22 +145,31 @@ new_plsr=function(decomp=list(),perm=list(), bootstrp=list(), sclng=list(),org_d
 #' This will print the loading matrices V and U that project from original data spaces X and Y to latent space.
 #' @param x A plsr object
 #' @param mat Which matrix to print (U or V), if NULL (default) will print both
+#' @param ... Further arguments.
 #' @examples
-#' \dontrun{
-#' loadings(x)
-#' loadings(x,"U")
-#' loadings(x,"V")
+#' \donttest{
+#' plsr_obj = pls(rating_data,tracking_data)
+#' loadings(plsr_obj) #show V and U
+#' loadings(plsr_obj,"V") #show V only
+#' loadings(plsr_obj,"U") #show U only
 #' }
 #' @export
-loadings.plsr=function(x,mat=NULL){
-  if (mat=='U' | is.null(mat)){
+loadings.plsr=function(x,mat=NULL, ...){
+  if (is.null(mat)){
+    cat("Loading matrix for X-side (V)\n")
+    print(x$decomposition$V)
     cat("Loading matrix for Y-side (U)\n")
     print(x$decomposition$U)
   }
-  if (mat=='V' | is.null(mat)){
+  else if (mat=='V'){
     cat("Loading matrix for X-side (V)\n")
     print(x$decomposition$V)
   }
+  else if (mat=='U'){
+    cat("Loading matrix for Y-side (U)\n")
+    print(x$decomposition$U)
+  }
+
 }
 
 #'  Plot function for plsr objects
@@ -173,8 +185,9 @@ loadings.plsr=function(x,mat=NULL){
 #' @param x The plsr object.
 #' @param ... Further arguments.
 #' @examples
-#' \dontrun{
-#' plot(x)
+#' \donttest{
+#' plsr_obj = pls(rating_data,tracking_data)
+#' plot(plsr_obj) #will open several plots and requires user input inbetween
 #' }
 #'
 #' @export
@@ -235,8 +248,8 @@ plot_boot_results = function(plsr_obj, sig_threshold=1.96){
 #' @param plsr_obj The plsr object.
 #'
 #' @examples
-#' \dontrun{plot_explained_variance(plsr_obj)}
-#'
+#' plsr_obj = pls(rating_data, tracking_data,10,10)
+#' plot_explained_variance(plsr_obj)
 #' @export
 plot_explained_variance=function(plsr_obj){
   exp_list = explained_variance(plsr_obj)
@@ -256,14 +269,24 @@ plot_explained_variance=function(plsr_obj){
 #' @param plsr_obj A plsr object
 #' @param lv_num An integer or list of integer specifying which latent variables to plot.
 #' @param sd Range in standard deviations from +[sd] to -[sd].
-#' @param FUN A vector containing two functions, which will be used for plotting. Default is c(barplot,barplot).
+#' @param FUN A vector containing two functions, which will be used for plotting the results of
+#'    changes in the latent variable(s) in X and Y. Default is \code{c(barplot,barplot)}.
 #' @param args1 Arguments for the plotting function in \code{FUN[1]}
 #' @param args2 Arguments for the plotting function in \code{FUN[2]}
 #' @examples
-#' \dontrun{
+#' plsr_obj = pls(rating_data, tracking_data,10,10)
+#'
+#' #plot latent variable effect with barplots (default) for X and Y side
 #' plot_latent_variables(plsr_obj)
-#' plot_latent_variables(plsr_obj,lv=1:2, sd=2, FUN=c(customplot,barplot))
-#' }
+#' \donttest{
+#' #plot latent variables with a barplots for the X side and
+#' #a custom plot function tailored to face tracking data for the Y side
+#' plot_latent_variables(plsr_obj,lv=1:2, sd=2, FUN=c(barplot,plsr:::plot_frame))
+#'
+#' #same as above but with additional arguments passed to the plotting functions
+#' plot_latent_variables(p,FUN = c(barplot,plsr:::plot_frame),
+#'     args1=list(col="red"),args2 = list(single_frame=5))
+#'}
 #'
 #' @export
 plot_latent_variables = function(plsr_obj, lv_num=1, sd=3, FUN=c(barplot,barplot), args1=NULL, args2=NULL){
@@ -281,15 +304,16 @@ plot_latent_variables = function(plsr_obj, lv_num=1, sd=3, FUN=c(barplot,barplot
 
   for (i in 1:num_steps){
     plot_title = paste(steps[i],"SDs")
-    Y_side=rowSums(cbind((U%*%sqrt(D)*steps[i])[,lv_num]))*scaling$Y_scale+scaling$Y_mean
-    args = c(list(Y_side,main=plot_title),args1)
+    X_side = rowSums(cbind((V*steps[i])[,lv_num]))*scaling$X_scale+scaling$X_mean
+    args = c(list(X_side,main=plot_title),args1)
     do.call(F1,args)
   }
   for (i in 1:num_steps){
-    X_side = rowSums(cbind((V*steps[i])[,lv_num]))*scaling$X_scale+scaling$X_mean
-    args = c(list(X_side),args2)
+    Y_side=rowSums(cbind((U%*%sqrt(D)*steps[i])[,lv_num]))*scaling$Y_scale+scaling$Y_mean
+    args = c(list(Y_side),args2)
     do.call(F2,args)
   }
+
   par(mfrow=old_setting)
 }
 
@@ -306,8 +330,12 @@ plot_latent_variables = function(plsr_obj, lv_num=1, sd=3, FUN=c(barplot,barplot
 #' @param col The color of the line indicating alpha.
 #'
 #' @examples
-#' \dontrun{
+#' plsr_obj = pls(rating_data,tracking_data,10,10)
 #' plot_perm_results(plsr_obj)
+#' \donttest{
+#' #plot with 0.10 as the significance threshold instead of the one specified by the plsr object
+#' #and a thicker blue-colored line to indicate it
+#' plot_perm_results(plsr_obj,lwd=5,col="blue", alpha=0.10)
 #' }
 #' @export
 plot_perm_results=function(plsr_obj,...,alpha = NULL,main = "Permutation Testing Results",lwd=2,col="red"){
@@ -326,7 +354,11 @@ plot_perm_results=function(plsr_obj,...,alpha = NULL,main = "Permutation Testing
 #' @param bar_col Color of the bars in the histograms.
 #' @param line_col Color of the vertial line indicating the estimated value of the singular value.
 #' @examples
-#' \dontrun{plot_perm_distr(plsr_obj)}
+#' plsr_obj = pls(rating_data,tracking_data,10,10)
+#' plot_perm_distr(plsr_obj)
+#' \donttest{
+#' plot_perm_distr(plsr_obj,breaks=5,lwd=5 ,bar_col = "white", line_col = "green")
+#' }
 #' @export
 plot_perm_distr = function(plsr_obj,..., lwd=2,bar_col="grey", line_col="red"){
   n_comp = ncol(plsr_obj$decomposition$D)
@@ -354,7 +386,11 @@ plot_perm_distr = function(plsr_obj,..., lwd=2,bar_col="grey", line_col="red"){
 #'
 #' @param x A plsr object.
 #' @param ... Further arguments.
-#'
+#' @examples
+#' X = matrix(rnorm(300),ncol=3)
+#' Y = matrix(rnorm(1000),ncol = 10)
+#' plsr_obj = pls(X,Y)
+#' print(plsr_obj)
 #' @export
 print.plsr=function(x,...){
   cat("Call:\n")
@@ -379,7 +415,12 @@ print.plsr=function(x,...){
 #' @param ... Additional arguments.
 #'
 #' @examples
-#' \dontrun{predict(plsr_obj,rnorm(10),"forward")}
+#' plsr_obj = pls(rating_data,tracking_data,10,10)
+#' prediction=predict(plsr_obj,runif(7,1,101),"forward")
+#' \donttest{
+#' #visualizing results with face tracking data specific function
+#' plsr:::plot_frame(prediction)
+#' }
 #' @export
 predict.plsr=function(object,new_data,direction="forward",...){
   if (class(new_data)=="data.frame"){
@@ -436,10 +477,17 @@ predict.plsr=function(object,new_data,direction="forward",...){
 #' @param alpha The significance level for permutation testing.
 #' @return A plsr Object.
 #' @examples
-#' X=matrix(rnorm(300), ncol = 3)
-#' Y=matrix(rnorm(1000), ncol = 10)
+#' X = matrix(rnorm(300), ncol = 3)
+#' Y = matrix(rnorm(1000), ncol = 10)
 #' pls(X,Y)
 #' pls(X,Y, n_perm = 10, n_boot = 10)
+#' \donttest{
+#' #running pls function on included data of the package
+#' plsr_obj=pls(rating_data,tracking_data,1000,1000)
+#' #inspecting results:
+#' plot(plsr_obj)
+#' summary(plsr_obj)
+#' }
 #' @export
 pls = function(X,Y,n_perm=100,n_boot=100, scale=T, verbose=F, alpha=0.05){
   #TODO: should this also work if X or Y only have one dimensions? IF so, need to make it work
@@ -568,9 +616,8 @@ pls = function(X,Y,n_perm=100,n_boot=100, scale=T, verbose=F, alpha=0.05){
 #' @param object A plsr object.
 #' @param ... Further arguments.
 #' @examples
-#' \dontrun{
-#' summary(plsr_object)
-#' }
+#' plsr_obj = pls(rating_data,tracking_data,10,10)
+#' summary(plsr_obj)
 #' @export
 summary.plsr=function(object, ...){
   cat("Permutation iterations:", object$permutation$n_perm,"\n")

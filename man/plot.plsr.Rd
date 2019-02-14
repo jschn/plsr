@@ -21,8 +21,9 @@ Plots information about a plsr object. The following plots will be generated:
 }
 }
 \examples{
-\dontrun{
-plot(x)
+\donttest{
+plsr_obj = pls(rating_data,tracking_data)
+plot(plsr_obj)
 }
 
 }

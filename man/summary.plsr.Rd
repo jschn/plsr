@@ -15,7 +15,8 @@
 Summary of plsr object
 }
 \examples{
-\dontrun{
-summary(plsr_object)
+\donttest{
+plsr_obj = pls(rating_data,tracking_data)
+summary(plsr_obj)
 }
 }

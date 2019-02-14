@@ -14,3 +14,9 @@
 \description{
 Prints information about a plsr object.
 }
+\examples{
+X = matrix(rnorm(300),ncol=3)
+Y = matrix(rnorm(1000),ncol = 10)
+plsr_obj = pls(X,Y)
+print(plsr_obj)
+}

@@ -24,7 +24,7 @@ new_plsr(decomp = list(), perm = list(), bootstrp = list(),
 Constructor for plsr objects
 }
 \examples{
-\dontrun{
-plsr_obj=new_plsr(d,p,b,s,o,c)
-}
+#Creating an empty plsr object
+d=p=b=s=o=c = list()
+plsr_obj=new_plsr(decomp=d,perm=p,bootstrp=b,sclng=s,org_dat=o,cl=c)
 }

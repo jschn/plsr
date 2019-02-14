@@ -4,20 +4,23 @@
 \alias{loadings.plsr}
 \title{Print loadings of plsr object}
 \usage{
-loadings.plsr(x, mat = NULL)
+loadings.plsr(x, mat = NULL, ...)
 }
 \arguments{
 \item{x}{A plsr object}
 
 \item{mat}{Which matrix to print (U or V), if NULL (default) will print both}
+
+\item{...}{Further arguments.}
 }
 \description{
 This will print the loading matrices V and U that project from original data spaces X and Y to latent space.
 }
 \examples{
-\dontrun{
-loadings(x)
-loadings(x,"U")
-loadings(x,"V")
+\donttest{
+plsr_obj = pls(rating_data,tracking_data)
+loadings(plsr_obj) #show V and U
+loadings(plsr_obj,"V") #show V only
+loadings(plsr_obj,"U") #show U only
 }
 }

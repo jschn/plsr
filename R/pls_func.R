@@ -143,18 +143,15 @@ new_plsr=function(decomp=list(),perm=list(), bootstrp=list(), sclng=list(),org_d
 #' Print loadings of plsr object
 #'
 #' This will print the loading matrices V and U that project from original data spaces X and Y to latent space.
-#' @param x A plsr object
-#' @param mat Which matrix to print (U or V), if NULL (default) will print both
-#' @param ... Further arguments.
+#' @param x A plsr object.
+#' @param mat Which matrix to print. Can be "V" or "U", if NULL (default) will print both.
 #' @examples
-#' \donttest{
-#' plsr_obj = pls(rating_data,tracking_data)
+#' plsr_obj = pls(rating_data,tracking_data,10,10)
 #' loadings(plsr_obj) #show V and U
 #' loadings(plsr_obj,"V") #show V only
 #' loadings(plsr_obj,"U") #show U only
-#' }
 #' @export
-loadings.plsr=function(x,mat=NULL, ...){
+loadings=function(x, mat=NULL){
   if (is.null(mat)){
     cat("Loading matrix for X-side (V)\n")
     print(x$decomposition$V)
@@ -279,12 +276,12 @@ plot_explained_variance=function(plsr_obj){
 #' #plot latent variable effect with barplots (default) for X and Y side
 #' plot_latent_variables(plsr_obj)
 #' \donttest{
-#' #plot latent variables with a barplots for the X side and
+#' #plot latent variables with barplots for the X side and
 #' #a custom plot function tailored to face tracking data for the Y side
 #' plot_latent_variables(plsr_obj,lv=1:2, sd=2, FUN=c(barplot,plsr:::plot_frame))
 #'
 #' #same as above but with additional arguments passed to the plotting functions
-#' plot_latent_variables(p,FUN = c(barplot,plsr:::plot_frame),
+#' plot_latent_variables(plsr_obj,FUN = c(barplot,plsr:::plot_frame),
 #'     args1=list(col="red"),args2 = list(single_frame=5))
 #'}
 #'

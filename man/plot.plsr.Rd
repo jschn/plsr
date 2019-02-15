@@ -23,7 +23,7 @@ Plots information about a plsr object. The following plots will be generated:
 \examples{
 \donttest{
 plsr_obj = pls(rating_data,tracking_data)
-plot(plsr_obj)
+plot(plsr_obj) #will open several plots and requires user input inbetween
 }
 
 }

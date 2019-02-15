@@ -22,8 +22,9 @@ plot_perm_distr(plsr_obj, ..., lwd = 2, bar_col = "grey",
 Plots histograms of the null distribution for values of singular values of latent variables constructed via permutation testing.
 }
 \examples{
-\donttest{
-plsr_obj = pls(rating_data,tracking_data)
+plsr_obj = pls(rating_data,tracking_data,10,10)
 plot_perm_distr(plsr_obj)
+\donttest{
+plot_perm_distr(plsr_obj,breaks=5,lwd=5 ,bar_col = "white", line_col = "green")
 }
 }

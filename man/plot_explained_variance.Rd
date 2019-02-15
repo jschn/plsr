@@ -13,9 +13,6 @@ plot_explained_variance(plsr_obj)
 Calculates and plots the variance explained in the original data X and Y by each additional latent variable.
 }
 \examples{
-\dontrun{
-plsr_obj = pls(rating_data, tracking_data)
+plsr_obj = pls(rating_data, tracking_data,10,10)
 plot_explained_variance(plsr_obj)
-}
-
 }

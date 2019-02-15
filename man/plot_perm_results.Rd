@@ -25,8 +25,11 @@ If NULL (default), the alpha value of the plsr object will be used.}
 Plots the p-values for the latent variables estimated through permutation testing.
 }
 \examples{
-\donttest{
-plsr_obj = pls(rating_data,tracking_data)
+plsr_obj = pls(rating_data,tracking_data,10,10)
 plot_perm_results(plsr_obj)
+\donttest{
+#plot with 0.10 as the significance threshold instead of the one specified by the plsr object
+#and a thicker blue-colored line to indicate it
+plot_perm_results(plsr_obj,lwd=5,col="blue", alpha=0.10)
 }
 }

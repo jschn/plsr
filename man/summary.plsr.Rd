@@ -15,8 +15,6 @@
 Summary of plsr object
 }
 \examples{
-\donttest{
-plsr_obj = pls(rating_data,tracking_data)
+plsr_obj = pls(rating_data,tracking_data,10,10)
 summary(plsr_obj)
-}
 }

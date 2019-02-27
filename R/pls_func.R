@@ -270,6 +270,8 @@ plot_explained_variance=function(plsr_obj){
 #'    changes in the latent variable(s) in X and Y. Default is \code{c(barplot,barplot)}.
 #' @param args1 Arguments for the plotting function in \code{FUN[1]}
 #' @param args2 Arguments for the plotting function in \code{FUN[2]}
+#' @param side If "both" (default), the effects of the latent variable on both X and Y sides will be plotted.
+#'    Use "X" to plot only the X side, and "Y" for only plotting the Y side.
 #' @examples
 #' plsr_obj = pls(rating_data, tracking_data,10,10)
 #'
@@ -286,7 +288,7 @@ plot_explained_variance=function(plsr_obj){
 #'}
 #'
 #' @export
-plot_latent_variables = function(plsr_obj, lv_num=1, sd=3, FUN=c(barplot,barplot), args1=NULL, args2=NULL){
+plot_latent_variables = function(plsr_obj, lv_num=1, sd=3, FUN=c(barplot,barplot), args1=NULL, args2=NULL, side="both"){
   U = plsr_obj$decomposition$U
   V = plsr_obj$decomposition$V
   D = plsr_obj$decomposition$D
@@ -295,22 +297,26 @@ plot_latent_variables = function(plsr_obj, lv_num=1, sd=3, FUN=c(barplot,barplot
   steps = c(-sd,0,sd)
   num_steps = length(steps)
   old_setting = par()$mfrow
-  par(mfrow=c(2,num_steps))
   F1 = FUN[[1]]
   F2 = FUN[[2]]
 
-  for (i in 1:num_steps){
-    plot_title = paste(steps[i],"SDs")
-    X_side = rowSums(cbind((V*steps[i])[,lv_num]))*scaling$X_scale+scaling$X_mean
-    args = c(list(X_side,main=plot_title),args1)
-    do.call(F1,args)
-  }
-  for (i in 1:num_steps){
-    Y_side=rowSums(cbind((U%*%sqrt(D)*steps[i])[,lv_num]))*scaling$Y_scale+scaling$Y_mean
-    args = c(list(Y_side),args2)
-    do.call(F2,args)
-  }
+  if (side == "both")  par(mfrow=c(2,num_steps))  else par(mfrow=c(1,num_steps))
 
+  if (side == "both" | side=="X"){
+    for (i in 1:num_steps){
+      plot_title = paste(steps[i],"SDs")
+      X_side = rowSums(cbind((V*steps[i])[,lv_num]))*scaling$X_scale+scaling$X_mean
+      args = c(list(X_side,main=plot_title),args1)
+      do.call(F1,args)
+    }
+  }
+  if (side == "both"| side=="Y"){
+    for (i in 1:num_steps){
+      Y_side=rowSums(cbind((U%*%sqrt(D)*steps[i])[,lv_num]))*scaling$Y_scale+scaling$Y_mean
+      args = c(list(Y_side),args2)
+      do.call(F2,args)
+    }
+  }
   par(mfrow=old_setting)
 }
 

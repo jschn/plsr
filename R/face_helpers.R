@@ -38,7 +38,7 @@ plot_frame=function(frame_vec,lim=T, single_frame=NULL,...){
     x[connections[,1]],
     y[connections[,1]],
     x[connections[,2]],
-    y[connections[,2]]
+    y[connections[,2]],...
   )
 }
 

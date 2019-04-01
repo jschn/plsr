@@ -558,7 +558,7 @@ pls = function(X,Y,n_perm=100,n_boot=100, scale=T, verbose=F, alpha=0.05){
   #calculate p values here: percentage of singular value distribution that is bigger than our obtained svs
   p_vals = c()
   for (v in 1:length(D)){
-    #use conservative estimate, avoid p=0
+    #use conservative estimate, avoid p=0, following Phipson and Smyth 2011
     new_pval=(sum(D_perm_vals[,v]>=D[v])+1)/(n_perm+1)
     p_vals=c(p_vals,new_pval)
   }

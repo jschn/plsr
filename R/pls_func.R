@@ -37,7 +37,7 @@ biplot.plsr = function(x,side="X",LVs=c(1,2),...){
 
 bootstrap_saliences <- function(data,indices,X_ncol, V) {
   data = data[indices,]
-
+  #TODO: progressbar
   #data contains both X and Y, so need to separate them again
   X_boot = data[,1:X_ncol]
   Y_ind1 = (X_ncol+1)
@@ -444,21 +444,26 @@ predict.plsr=function(object,new_data,direction="forward",...){
     x_scaled = sweep(x_centered,2,scaling$X_scale,"/")
     x_v_space = x_scaled%*%V #vector in latent space
 
-    pred = U%*%sqrt(D)%*%t(x_v_space)
-    pred_scaled_back = pred*scaling$Y_scale+scaling$Y_mean
+    #pred = U%*%sqrt(D)%*%t(x_v_space)
+    pred = t(U%*%t(x_v_space))
+    pred_scaled_back = sweep(pred,2,scaling$Y_scale,"*")
+    pred_recentered = sweep(pred_scaled_back,2,scaling$Y_mean,"+")
 
-    return(pred_scaled_back)
+    return(pred_recentered)
   }
   else{
     warning("Backward prediction is untested and might give incorrect results!")
     y_centered = sweep(new_data,2,scaling$Y_mean,"-")
     y_scaled = sweep(y_centered,2,scaling$Y_scale,"/")
-    y_u_space = y_scaled%*%U #vector in latent space, TODO: this should be transposed (maybe?)
+    y_u_space = y_scaled%*%U
 
     pred = y_u_space%*%sqrt(D)%*%t(V)
-    pred_scaled_back = pred*scaling$X_scale+scaling$X_mean
+    #pred = y_u_space%*%t(V)
 
-    return(pred_scaled_back)
+    pred_scaled_back = sweep(pred,2,scaling$X_scale,"*")
+    pred_recentered = sweep(pred_scaled_back,2,scaling$X_mean,"+")
+
+    return(pred_recentered)
   }
 
 }
@@ -473,11 +478,14 @@ predict.plsr=function(object,new_data,direction="forward",...){
 #'
 #' @param X A matrix of m observations on n_x variables.
 #' @param Y A matrix of m observations on n_y dimensions.
-#' @param n_perm Number of permutation iterations. Default is 100.
-#' @param n_boot Number of bootstrap iterations. Default is 100.
+#' @param n_perm Number of permutation iterations. Default is 100. Minimum 10.
+#' @param n_boot Number of bootstrap iterations. Default is 100. Minimum 10.
 #' @param scale Scaling of X and Y (Boolean).
 #' @param verbose Provides additional output.
 #' @param alpha The significance level for permutation testing.
+#' @param rotation Use rotation during the permutation iterations.
+#' @param drop_perm Drops singular values of permutation iterations after p-value calculation.
+#' @param drop_boot Drops singular values of bootstrap iterations after standard error calculation.
 #' @return A plsr Object.
 #' @examples
 #' X = matrix(rnorm(300), ncol = 3)
@@ -492,16 +500,17 @@ predict.plsr=function(object,new_data,direction="forward",...){
 #' summary(plsr_obj)
 #' }
 #' @export
-pls = function(X,Y,n_perm=100,n_boot=100, scale=T, verbose=F, alpha=0.05){
-  #TODO: should this also work if X or Y only have one dimensions? IF so, need to make it work
+pls = function(X,Y,n_perm=100,n_boot=100, scale=T, verbose=F, alpha=0.05, rotation=F, drop_perm=F, drop_boot=F){
+  #TODO: should this also work if X or Y only have one dimension? IF so, need to make it work
+  #TODO: scale = false then prediction does not work because then the scale attribute is not set...
+
   if (n_perm<10) n_perm=10
   if (n_boot<10) n_boot=10
 
-  #standardize matrices
-  if (scale){
-    X = scale(X)
-    Y = scale(Y)
-  }
+  #center and scale matrix if specified
+  X = scale(X, center=T, scale = scale)
+  Y = scale(Y, center=T, scale = scale)
+
   #SVD
   R = t(Y)%*%X
   svd_sol=svd(R)
@@ -527,7 +536,7 @@ pls = function(X,Y,n_perm=100,n_boot=100, scale=T, verbose=F, alpha=0.05){
 
     utils::setTxtProgressBar(permutation_progress,p)
 
-    #let's permute X
+    #permuting X
     X_perm = X[sample(nrow(X)),]
     #SVD
     R_perm = t(Y)%*%X_perm
@@ -535,21 +544,25 @@ pls = function(X,Y,n_perm=100,n_boot=100, scale=T, verbose=F, alpha=0.05){
     U_perm = svd_sol$u
     V_perm = svd_sol$v
     D_perm = svd_sol$d
+    if (rotation){
+      #following McIntosh and Lobaugh 2004 (https://doi.org/10.1016/j.neuroimage.2004.07.020)
+      #calculate procrustes rotation to align solutions
+      svd_perm=svd(t(V)%*%V_perm)
+      N = svd_perm$u
+      P = svd_perm$v
+      Q = N%*%t(P)
 
-    #following McIntosh and Lobaugh 2004 (https://doi.org/10.1016/j.neuroimage.2004.07.020)
-    #calculate procrustes rotation to align solutions
-    svd_perm=svd(t(V)%*%V_perm)
-    N = svd_perm$u
-    P = svd_perm$v
-    Q = N%*%t(P)
+      #apply rotation
+      V_perm_rot = V_perm %*% diag(D_perm) %*% Q
+      U_perm_rot = U_perm %*% diag(D_perm) %*% Q
 
-    #apply rotation
-    V_perm_rot = V_perm %*% diag(D_perm) %*% Q
-    U_perm_rot = U_perm %*% diag(D_perm) %*% Q
-
-    #now need to calculate the singular values from rotated matrix again and store in D_perm_vals
-    #"can be obtained by calculating the columnwise square root of the sums-of-squares"
-    D_perm_vals[p,]=sqrt(colSums(V_perm_rot**2))
+      #now need to calculate the singular values from rotated matrix again and store in D_perm_vals
+      #"can be obtained by calculating the columnwise square root of the sums-of-squares"
+      D_perm_vals[p,]=sqrt(colSums(V_perm_rot**2))
+    }
+    else{
+      D_perm_vals[p,]=D_perm
+    }
   }
 
   close(permutation_progress)
@@ -592,6 +605,9 @@ pls = function(X,Y,n_perm=100,n_boot=100, scale=T, verbose=F, alpha=0.05){
   #reshape linearized V and U standard error matrices again
   V_SE = matrix(v_se,nrow=nrow(V))
   U_SE = matrix(u_se,nrow=nrow(U))
+
+  if (drop_perm) D_perm_vals=c()
+  if (drop_boot) D_boot_vals=c()
 
   #organize output
   precision = permutation_precision(p_vals,n_perm)

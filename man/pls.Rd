@@ -5,22 +5,28 @@
 \title{Run partial least squares analysis}
 \usage{
 pls(X, Y, n_perm = 100, n_boot = 100, scale = T, verbose = F,
-  alpha = 0.05)
+  alpha = 0.05, rotation = F, drop_perm = F, drop_boot = F)
 }
 \arguments{
 \item{X}{A matrix of m observations on n_x variables.}
 
 \item{Y}{A matrix of m observations on n_y dimensions.}
 
-\item{n_perm}{Number of permutation iterations. Default is 100.}
+\item{n_perm}{Number of permutation iterations. Default is 100. Minimum 10.}
 
-\item{n_boot}{Number of bootstrap iterations. Default is 100.}
+\item{n_boot}{Number of bootstrap iterations. Default is 100. Minimum 10.}
 
 \item{scale}{Scaling of X and Y (Boolean).}
 
 \item{verbose}{Provides additional output.}
 
 \item{alpha}{The significance level for permutation testing.}
+
+\item{rotation}{Use rotation during the permutation iterations.}
+
+\item{drop_perm}{Drops singular values of permutation iterations after p-value calculation.}
+
+\item{drop_boot}{Drops singular values of bootstrap iterations after standard error calculation.}
 }
 \value{
 A plsr Object.

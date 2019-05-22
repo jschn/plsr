@@ -5,7 +5,7 @@
 \title{Plots latent variables}
 \usage{
 plot_latent_variables(plsr_obj, lv_num = 1, sd = 3, FUN = c(barplot,
-  barplot), args1 = NULL, args2 = NULL)
+  barplot), args1 = NULL, args2 = NULL, side = "both")
 }
 \arguments{
 \item{plsr_obj}{A plsr object}
@@ -20,6 +20,9 @@ changes in the latent variable(s) in X and Y. Default is \code{c(barplot,barplot
 \item{args1}{Arguments for the plotting function in \code{FUN[1]}}
 
 \item{args2}{Arguments for the plotting function in \code{FUN[2]}}
+
+\item{side}{If "both" (default), the effects of the latent variable on both X and Y sides will be plotted.
+Use "X" to plot only the X side, and "Y" for only plotting the Y side.}
 }
 \description{
 This function will plot the effects of increasing and decreasing one or several latent variables by the specified standard deviation.
